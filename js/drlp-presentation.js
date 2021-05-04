@@ -25,3 +25,11 @@ function RandomColor() {
 		return TileColor.yellow
 	}
 }
+
+function drawPill(x, y) {
+	const pillWidth = 14/2
+	ctx.beginPath()
+	ctx.arc(_board.x + x * 20, _board.y + y * 20, pillWidth, 0, 2*Math.PI)
+	ctx.fill()
+	ctx.closePath()
+}
