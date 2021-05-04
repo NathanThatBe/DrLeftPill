@@ -43,7 +43,7 @@ const TileColor = Object.freeze({
 
 const Animation = function() {
 return {
-	scale: 0
+	scale: 1
 }
 }
 
@@ -169,7 +169,7 @@ function canMove(board, x, y, dir) {
 	return dekiru
 }
 
-function convertFloatingPills() {
+function convertFloatingPills(board) {
 	// Pill can be disconnected if:
 	// 1. Other pill end is gone
 	// 2. (Hori) Both pill ends floating
@@ -185,11 +185,11 @@ function convertFloatingPills() {
 	}
 
 	// 1.
-	for (var yy = 0; yy < _board.h; yy++) {
-		for (var xx = 0; xx < _board.w; xx++) {
-			var tile = _board.tiles[yy][xx]
+	for (var yy = 0; yy < board.h; yy++) {
+		for (var xx = 0; xx <board.w; xx++) {
+			var tile = board.tiles[yy][xx]
 			if (isDef(tile.connectionDir)) {
-				var otherEnd = findOtherPillEnd(_board, xx, yy, tile.connectionDir)
+				var otherEnd = findOtherPillEnd(board, xx, yy, tile.connectionDir)
 				if (otherEnd.type !== TileType.pill || !isDef(otherEnd.connectionDir)) {
 					pushTile([xx, yy])
 				}
@@ -198,14 +198,14 @@ function convertFloatingPills() {
 	}
 
 	// 2.
-	for (var yy = 0; yy < _board.h; yy++) {
-		for (var xx = 0; xx < _board.w; xx++) {
-			var tile = _board.tiles[yy][xx]
+	for (var yy = 0; yy < board.h; yy++) {
+		for (var xx = 0; xx < board.w; xx++) {
+			var tile = board.tiles[yy][xx]
 			if (isDef(tile.connectionDir)) {
 				var otherEnd = offsetPos(xx, yy, tile.connectionDir)
 
-				var tileBelow0 = findTileBelow(_board, xx, yy)
-				var tileBelow1 = findTileBelow(_board, otherEnd[0], otherEnd[1])
+				var tileBelow0 = findTileBelow(board, xx, yy)
+				var tileBelow1 = findTileBelow(board, otherEnd[0], otherEnd[1])
 				if (!isDef(tileBelow0) || !isDef(tileBelow1)) continue
 				if (tileBelow0.type === TileType.none && tileBelow1.type === TileType.none) {
 					pushTile([xx, yy])
@@ -216,11 +216,11 @@ function convertFloatingPills() {
 	}
 
 	// 3.
-	for (var yy = 0; yy < _board.h; yy++) {
-		for (var xx = 0; xx < _board.w; xx++) {
-			var tile = _board.tiles[yy][xx]
+	for (var yy = 0; yy < board.h; yy++) {
+		for (var xx = 0; xx < board.w; xx++) {
+			var tile = board.tiles[yy][xx]
 			if (isDef(tile.connectionDir) && tile.connectionDir === PillDir.up) {
-				var tileBelow = findTileBelow(_board, xx, yy)
+				var tileBelow = findTileBelow(board, xx, yy)
 				if (!isDef(tileBelow)) continue
 				if (tileBelow.type === TileType.none) {
 					pushTile([xx, yy])
@@ -282,7 +282,7 @@ function offsetPos(x, y, dir) {
 function findOtherPillEnd(board, x, y, dir) {
 	var offset = dirToOffset(dir)
 	
-	if (outOfBounds(x + offset[0], y + offset[1])) {
+	if (board.isOutOfBounds(x + offset[0], y + offset[1])) {
 		return null
 	}
 	return board.tiles[y + offset[1]][x + offset[0]]
@@ -290,7 +290,7 @@ function findOtherPillEnd(board, x, y, dir) {
 
 function findTileBelow(board, x, y) {
 	console.assert(isDef(board))
-	if (outOfBounds(x, y + 1)) return null
+	if (board.isOutOfBounds(x, y + 1)) return null
 	return board.tiles[y+1][x]
 }
 
@@ -339,7 +339,7 @@ function searchHorizontally(board, x, y) {
 	return combo
 }
 
-function findComboTiles() {
+function findComboTiles(board) {
 	var tilesToRemove = []
 	function pushTile(tile) {
 		var isDuplicate = false
@@ -349,16 +349,16 @@ function findComboTiles() {
 		if (!isDuplicate) tilesToRemove.push(tile)
 	}
 	const minCombo = 4
-	for (var xx = 0; xx < _board.w; xx++) {
-		for (var yy = 0; yy < _board.h; yy++) {
-			var comboY = searchVertically(_board, xx, yy)
+	for (var xx = 0; xx < board.w; xx++) {
+		for (var yy = 0; yy < board.h; yy++) {
+			var comboY = searchVertically(board, xx, yy)
 			if (comboY >= minCombo) {
 				for (var jj = 0; jj < comboY; jj++) {
 					pushTile([xx, yy+jj])
 				}
 			}
 
-			var comboX = searchHorizontally(_board, xx, yy)
+			var comboX = searchHorizontally(board, xx, yy)
 			if (comboX >= minCombo) {
 				for (var jj = 0; jj < comboX; jj++) {
 					pushTile([xx+jj, yy])

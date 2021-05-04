@@ -2,7 +2,6 @@
 Dr. Mario Clone in JS
 
 TODO:
-- Refactor: merge drlp-game and drlp-arcado
-- Fix inputs
+- Add queue, migrate game logic
 - Scoring
 - Polish timings

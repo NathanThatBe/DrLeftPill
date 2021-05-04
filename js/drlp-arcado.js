@@ -6,9 +6,10 @@ var _paused = false
 let _canvas = document.createElement("canvas")
 let _ctx = _canvas.getContext("2d")
 let ratio = window.devicePixelRatio || 1
+console.log(ratio)
 _canvas.width = Math.floor(500 * ratio)
 _canvas.height = Math.floor(500 * ratio)
-//_ctx.scale(ratio, ratio)
+_ctx.scale(ratio, ratio)
 document.body.appendChild(_canvas)
 console.log("ARCADO - INIT")
 
@@ -71,6 +72,11 @@ return {
 			currTime = (Date.now() * 0.001) - initRealTime
 			prevTime = prev
 			const timeStep = (currTime - prevTime)
+			if (timeStep > 1) {
+				window.requestAnimationFrame(loop)
+				return
+			}
+			
 			context.time.timeStep = timeStep
 			context.time.currTime += timeStep
 

@@ -28,18 +28,20 @@ function RandomColor() {
 }
 
 
-function drawPill(ctx, x, y, dX, dY) {
-	const pillWidth = 14/2
+function drawPill(ctx, x, y, dX, dY, scale) {
+	const pillWidth = 14/2 * scale
 	ctx.beginPath()
 	ctx.arc(dX + x * 20, dY + y * 20, pillWidth, 0, 2*Math.PI)
 	ctx.fill()
 	ctx.closePath()
 }
 
-function drawPillboard(ctx, board, dX, dY) {
+function drawPillboard(ctx, board) {
 	console.assert(isDef(ctx))
 	console.assert(isDef(board))
 
+	var dX = board.dX
+	var dY = board.dY
 	for (var yy = 0; yy < board.h; yy++) {
 		for (var xx = 0; xx < board.w; xx++) {
 			var tile = board.tiles[yy][xx]
@@ -49,7 +51,7 @@ function drawPillboard(ctx, board, dX, dY) {
 			switch (tile.type) {
 				case TileType.none:
 					ctx.beginPath()
-					ctx.arc(dX + xx * 20, dY+ yy * 20, 10, 0, 2*Math.PI)
+					ctx.arc(dX + xx * 20, dY + yy * 20, 10, 0, 2*Math.PI)
 					ctx.fill()
 					ctx.closePath()
 					break
@@ -61,7 +63,7 @@ function drawPillboard(ctx, board, dX, dY) {
 					ctx.closePath()
 					break
 				case TileType.pill:
-					drawPill(ctx, xx, yy, dX, dY)
+					drawPill(ctx, xx, yy, dX, dY, tile.animation.scale)
 					break
 			}
 		}
@@ -72,26 +74,11 @@ function drawPlayerPill(ctx, playerPill, dX, dY) {
 	var firstColor = playerPill.isReversed ? playerPill.colors[0] : playerPill.colors[1]
 	var secondColor = playerPill.isReversed ? playerPill.colors[1] : playerPill.colors[0]
 	ctx.fillStyle = setFillColor(firstColor)
-	drawPill(ctx, playerPill.x, playerPill.y, dX, dY)
+	drawPill(ctx, playerPill.x, playerPill.y, dX, dY, 1)
 
 	ctx.fillStyle = setFillColor(secondColor)
-	drawPill(ctx, playerPill.x + getPillDirX(playerPill.dir), playerPill.y + getPillDirY(playerPill.dir), dX, dY)
+	drawPill(ctx, playerPill.x + getPillDirX(playerPill.dir), playerPill.y + getPillDirY(playerPill.dir), dX, dY, 1)
 }
-
-function drawText(ctx, playState) {
-	if (playState === PlayState.stageClear) {
-		ctx.fillStyle = "white"
-		ctx.font = "64px MONOSPACE"
-		ctx.textAlign = "center"
-		ctx.fillText("STAGE CLEAR!", ctx.w / 2, ctx.h / 2)
-	} else if (playState === PlayState.topOut) {
-		ctx.fillStyle = "white"
-		ctx.font = "64px MONOSPACE"
-		ctx.textAlign = "center"
-		ctx.fillText("TOP OUT!", ctx.w / 2, ctx.h / 2)
-	}
-}
-
 
 const ItemStatus = Object.freeze({
 	"unknown": 0,
@@ -105,6 +92,8 @@ const ItemEvent = Object.freeze({
 	"spawnedViruses": 1,
 	"spawnedPlayerPill": 2,
 	"droppedPlayerPill": 3,
+	"clearedCombos": 4,
+	"appliedGravity": 5,
 })
 
 const ItemReturn = function(status, event) {
@@ -126,7 +115,8 @@ return {
 	},
 	tick: function() {
 		return ItemReturn(ItemStatus.complete, ItemEvent.spawnedPlayerPill)
-	}	
+	},
+	draw: null,
 }
 }
 
@@ -170,7 +160,8 @@ return {
 			return ItemReturn(ItemStatus.complete, ItemEvent.spawnedViruses)
 		}
 		return ItemReturn(ItemStatus.waiting)
-	}
+	},
+	draw: null,
 }
 }
 
@@ -180,7 +171,7 @@ var _dropDelay = 0.5
 var _currTime = 0
 return {
 	enter: function() {
-
+		//console.log(gameState.board)
 	},
 	tick: function() {
 		console.assert(isDef(gameState.playerPill))
@@ -266,6 +257,105 @@ return {
 		}
 
 		return ItemReturn(ItemStatus.waiting)
+	},
+	draw: null,
+}
+}
+
+const ApplyGravityItem = function(context, gameState) {
+var _delay = {t: 0.3, dur: 0.3}
+return {
+	enter: () => {
+		var board = gameState.board
+		
+		// Break up pills
+		var floatingPills = convertFloatingPills(board)
+		floatingPills.forEach(tile => {
+			var pillEnd = board.tiles[tile[1]][tile[0]]
+			pillEnd.connectionDir = null
+		})
+	},
+	tick: () => {
+		// Update delay
+		_delay.t += context.time.timeStep
+		if (_delay.t < _delay.dur) {
+			return ItemReturn(ItemStatus.waiting)
+		}
+		_delay.t = 0
+
+		var board = gameState.board
+		var tilesHaveFallen = false
+		for (var xx = 0; xx < board.w; xx++) {
+			for (var yy = board.h - 1; yy >= 0; yy--) {
+				var tile = board.tiles[yy][xx]
+				if (tile.type === TileType.pill && !isDef(tile.connectionDir)) {
+					// check spot below
+					if (yy+1 < board.h) {
+						var tileBelow = board.tiles[yy+1][xx]
+						if (tileBelow.type === TileType.none) {
+							// move tile
+							board.tiles[yy+1][xx] = tile
+							board.tiles[yy][xx] = Tile(TileType.none, TileColor.none)
+						}
+					}
+				}
+			}
+		}
+		if (boardTilesThatCanFall(board).length > 0) {
+			return ItemReturn(ItemStatus.waiting)	
+		} else {
+			return ItemReturn(ItemStatus.complete, ItemEvent.appliedGravity)
+		}
+	},
+	draw: () => {
+
+	},
+}
+}
+
+const CheckComboItem = function(context, gameState) {
+var _tilesToRemove = null
+var _delay = {t: 0, dur: 0.2}
+return {
+	enter: () => {
+		// Find all combos
+		_tilesToRemove = findComboTiles(gameState.board)
+		//console.log("clearing combos:", _tilesToRemove)
+	},
+	tick: () => {
+		console.assert(isDef(_tilesToRemove))
+		if (_tilesToRemove.length === 0) {
+			return ItemReturn(ItemStatus.complete, ItemEvent.clearedCombos)
+		}
+
+		// Scale 1 tile at a time
+		var tile = _tilesToRemove[0]
+		_delay.t += context.time.timeStep
+
+		var t = lerp(1, 0, Math.min(1, _delay.t / _delay.dur))
+		var boardTile = gameState.board.tiles[tile[1]][tile[0]]
+		boardTile.animation.scale = t
+
+		if (_delay.t >= _delay.dur) {
+			//console.log("finished tile:", tile)
+			gameState.board.tiles[tile[1]][tile[0]] = Tile(TileType.none, TileColor.none)
+			_tilesToRemove.shift()
+			_delay.t = 0
+		}
+
+		return ItemReturn(ItemStatus.waiting)
+	},
+	draw: () => {
+		var board = gameState.board
+		var ctx = context.ctx
+		ctx.fillStyle = "clear"
+		ctx.strokeStyle = "white"
+		_tilesToRemove.forEach(tile => {
+			ctx.beginPath()
+			ctx.arc(board.dX + tile[0] * 20, board.dY + tile[1] * 20, 12, 0, 2*Math.PI)
+			ctx.stroke()
+			ctx.closePath()
+		})
 	},
 }
 }
