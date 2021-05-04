@@ -150,7 +150,6 @@ return {
 				}	
 			}
 		}
-		console.log("V:", _viruses)
 	},
 	tick: function() {
 		_elapsed += context.time.timeStep
