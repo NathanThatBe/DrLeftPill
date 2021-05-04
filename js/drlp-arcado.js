@@ -1,13 +1,9 @@
 "use strict"
 
-const DARK_PURPLE = "#1D071F"
-
 const Arcado = function() {
 	// Create canvas with 2D drawing context
 	let _canvas = document.createElement("canvas")
 	let _ctx = _canvas.getContext("2d")
-	//_canvas.style.width = "500px"
-	//_canvas.style.height = "500px"
 	let ratio = window.devicePixelRatio || 1
 	_canvas.width = Math.floor(500 * ratio)
 	_canvas.height = Math.floor(500 * ratio)
