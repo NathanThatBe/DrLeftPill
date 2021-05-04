@@ -1,14 +1,31 @@
+"use strict"
 
 function isDef(obj) {
 	return obj !== undefined && obj !== null;
 }
 
 function isUndef(obj) {
-	return obj === undefined;
+	return obj === undefined || obj === null;
 }
 
 function isNotNull(obj) {
 	return obj !== null;
+}
+
+function lerp(value0, value1, t) {
+	return value0 * (1 - t) + value1 * t;
+}
+
+function sin01(t) {
+	return (Math.sin(t) + 1) / 2;
+}
+
+function clamp01(v) {
+	return Math.max(0, Math.min(1, v));
+}
+
+function randomRange(min, max) {
+  return Math.random() * (max - min + 1) + min;
 }
 
 const TileType = Object.freeze({
@@ -24,13 +41,20 @@ const TileColor = Object.freeze({
 	"yellow": 3,
 })
 
+const Animation = function() {
+return {
+	scale: 0
+}
+}
+
 const Tile = function(tileType, tileColor) {
 console.assert(isDef(tileType))
 console.assert(isDef(tileColor))
 return {
 	type: tileType,
 	color: tileColor,
-	connectionDir: null
+	connectionDir: null,
+	animation: Animation(),
 }
 }
 
@@ -58,13 +82,30 @@ return {
 }
 
 const PillBoard = function() {
-return {
-	x: 0,
-	y: 0,
-	w: 0,
-	h: 0,
-	tiles: []
+const ROWS = 16
+const COLS = 8
+var _tiles = []
+var board = {
+	w: COLS,
+	h: ROWS,
+	tiles: _tiles,
+	getTileType: (x, y) => { return _tiles[y][x].type },
+	isOutOfBounds: (x, y) => {
+		if (x < 0 || x >= COLS || y < 0 || y >= ROWS) {
+			return true
+		}
+		return false
+	},
 }
+for (var yy = 0; yy < ROWS; yy++) {
+	var tileRow = []
+	for (var xx = 0; xx < COLS; xx++) {
+		var tile = Tile(TileType.none, TileColor.none)
+		tileRow.push(tile)
+	}
+	_tiles.push(tileRow)
+}
+return board
 }
 
 const PlayState = Object.freeze({
@@ -75,6 +116,15 @@ const PlayState = Object.freeze({
 	"topOut": 4,
 	"stageClear": 5
 })
+
+const GameState = function() {
+return {
+	board: PillBoard(),
+	playerPill: null,
+	playState: PlayState.none,
+	paused: false
+}
+}
 
 function getPillDirX(dir) {
 	console.assert(isDef(dir))
@@ -96,40 +146,23 @@ function getPillDirY(dir) {
 	}
 }
 
-function getTileType(x, y) {
-	return _board.tiles[y][x].type
-}
-
-function outOfBounds(xx, yy) {
-	if (xx < 0) {
-		return true
-	} else if (xx >= _board.w) {
-		return true
-	}
-	if (yy < 0) {
-		return true
-	} else if (yy >= _board.h) {
-		return true
-	}
-}
-
-function canMove(x, y, dir) {
+function canMove(board, x, y, dir) {
 	var dekiru = true
 	// Check bounds.
 	
-	if (outOfBounds(x, y)) {
+	if (board.isOutOfBounds(x, y)) {
 		return false
 	}
-	if (isDef(dir) && outOfBounds(x + getPillDirX(dir), y+ getPillDirY(dir))) {
+	if (isDef(dir) && board.isOutOfBounds(x + getPillDirX(dir), y+ getPillDirY(dir))) {
 			return false
 	}
 
-	if (getTileType(x, y) !== TileType.none) dekiru = false
+	if (board.getTileType(x, y) !== TileType.none) dekiru = false
 	if (isDef(dir)) {
 		const maxX = x + getPillDirX(dir)
 		const maxY = y + getPillDirY(dir)
 
-		if (getTileType(maxX, maxY) !== TileType.none) {
+		if (board.getTileType(maxX, maxY) !== TileType.none) {
 			dekiru = false
 		}
 	}

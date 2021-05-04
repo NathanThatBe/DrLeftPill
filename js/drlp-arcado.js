@@ -35,7 +35,6 @@ const Arcado = function() {
 			document.onkeydown = function(event) {
 				if (["Space", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].indexOf(event.code) > -1) {
 					event.preventDefault()
-					console.log("prevent default")
 				}
 				if (context.input.down.indexOf(event.key) < 0) {
 					context.input.pressed.push(event.key);
