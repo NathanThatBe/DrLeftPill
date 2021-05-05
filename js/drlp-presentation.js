@@ -95,6 +95,9 @@ const ItemEvent = Object.freeze({
 	"clearedCombos": 4,
 	"skippedCombos": 5,
 	"appliedGravity": 6,
+	"stageClear": 7,
+	"topOut": 8,
+	"nextTurn": 9,
 })
 
 const ItemReturn = function(status, event) {
@@ -363,5 +366,38 @@ return {
 			ctx.closePath()
 		})
 	},
+}
+}
+
+const CheckEndGameItem = function(context, gameState) {
+return {
+	enter: () => {
+	},
+	tick: () => {
+		var board = gameState.board
+		
+		// Check if all viruses are gone.
+		function hasViruses() {
+			for (var yy = 0; yy < board.h; yy++) {
+				for (var xx = 0; xx < board.w; xx++) {
+					if (board.tiles[yy][xx].type === TileType.virus)
+						return true
+				}
+			}
+			return false
+		}
+		if (!hasViruses()) {
+			return ItemReturn(ItemStatus.complete, ItemEvent.stageClear)
+		}
+
+		// Check if top out.
+		if (board.tiles[0][3].type !== TileType.none || board.tiles[0][4].type !== TileType.none) {
+			return ItemReturn(ItemStatus.complete, ItemEvent.topOut)
+		}
+
+		// Keep going.
+		return ItemReturn(ItemStatus.complete, ItemEvent.nextTurn)
+	},
+	draw: null
 }
 }

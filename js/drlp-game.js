@@ -39,25 +39,32 @@ function resetGame() {
 function handleEvent(event) {
 	switch (event) {
 		case ItemEvent.spawnedViruses:
-			// After viruses are spawned, spawn in a player pill.
 			queuePush(SpawnPlayerPillItem)
 			break
 		case ItemEvent.spawnedPlayerPill:
-			// After spawning in a player pill, give player control.
 			queuePush(DropPlayerPillItem)
 			break
 		case ItemEvent.droppedPlayerPill:
 			console.assert(isUndef(_gameState.playerPill))
 			queuePush(ApplyGravityItem)
 			break
+		case ItemEvent.appliedGravity:
+			queuePush(CheckComboItem)
+			break
 		case ItemEvent.clearedCombos:
 			queuePush(ApplyGravityItem)
 			break
 		case ItemEvent.skippedCombos:
-			queuePush(SpawnPlayerPillItem)
+			queuePush(CheckEndGameItem)
 			break
-		case ItemEvent.appliedGravity:
-			queuePush(CheckComboItem)
+		case ItemEvent.stageClear:
+			console.log("stage clear")
+			break
+		case ItemEvent.topOut:
+			console.log("top out")
+			break
+		case ItemEvent.nextTurn:
+			queuePush(SpawnPlayerPillItem)
 			break
 	}
 }
