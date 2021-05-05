@@ -93,7 +93,8 @@ const ItemEvent = Object.freeze({
 	"spawnedPlayerPill": 2,
 	"droppedPlayerPill": 3,
 	"clearedCombos": 4,
-	"appliedGravity": 5,
+	"skippedCombos": 5,
+	"appliedGravity": 6,
 })
 
 const ItemReturn = function(status, event) {
@@ -266,14 +267,6 @@ const ApplyGravityItem = function(context, gameState) {
 var _delay = {t: 0.3, dur: 0.3}
 return {
 	enter: () => {
-		var board = gameState.board
-		
-		// Break up pills
-		var floatingPills = convertFloatingPills(board)
-		floatingPills.forEach(tile => {
-			var pillEnd = board.tiles[tile[1]][tile[0]]
-			pillEnd.connectionDir = null
-		})
 	},
 	tick: () => {
 		// Update delay
@@ -283,7 +276,15 @@ return {
 		}
 		_delay.t = 0
 
+		// Break up pills
 		var board = gameState.board
+		var floatingPills = convertFloatingPills(board)
+		floatingPills.forEach(tile => {
+			var pillEnd = board.tiles[tile[1]][tile[0]]
+			pillEnd.connectionDir = null
+		})
+
+		// Apply gravity to columns of pills
 		var tilesHaveFallen = false
 		for (var xx = 0; xx < board.w; xx++) {
 			for (var yy = board.h - 1; yy >= 0; yy--) {
@@ -302,7 +303,7 @@ return {
 			}
 		}
 		if (boardTilesThatCanFall(board).length > 0) {
-			return ItemReturn(ItemStatus.waiting)	
+			return ItemReturn(ItemStatus.waiting)
 		} else {
 			return ItemReturn(ItemStatus.complete, ItemEvent.appliedGravity)
 		}
@@ -316,13 +317,17 @@ return {
 const CheckComboItem = function(context, gameState) {
 var _tilesToRemove = null
 var _delay = {t: 0, dur: 0.2}
+var _skip = false
 return {
 	enter: () => {
 		// Find all combos
 		_tilesToRemove = findComboTiles(gameState.board)
+		if (_tilesToRemove.length === 0) _skip = true
 		//console.log("clearing combos:", _tilesToRemove)
 	},
 	tick: () => {
+		if (_skip) return ItemReturn(ItemStatus.complete, ItemEvent.skippedCombos)
+
 		console.assert(isDef(_tilesToRemove))
 		if (_tilesToRemove.length === 0) {
 			return ItemReturn(ItemStatus.complete, ItemEvent.clearedCombos)

@@ -48,13 +48,16 @@ function handleEvent(event) {
 			break
 		case ItemEvent.droppedPlayerPill:
 			console.assert(isUndef(_gameState.playerPill))
-			queuePush(CheckComboItem)
+			queuePush(ApplyGravityItem)
 			break
 		case ItemEvent.clearedCombos:
 			queuePush(ApplyGravityItem)
 			break
-		case ItemEvent.appliedGravity:
+		case ItemEvent.skippedCombos:
 			queuePush(SpawnPlayerPillItem)
+			break
+		case ItemEvent.appliedGravity:
+			queuePush(CheckComboItem)
 			break
 	}
 }
