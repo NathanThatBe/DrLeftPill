@@ -216,6 +216,7 @@ function convertFloatingPills(board) {
 	}
 
 	// 3.
+	/*
 	for (var yy = 0; yy < board.h; yy++) {
 		for (var xx = 0; xx < board.w; xx++) {
 			var tile = board.tiles[yy][xx]
@@ -228,37 +229,60 @@ function convertFloatingPills(board) {
 			}
 		}
 	}
+	*/
 
 	return pillsToBeBroken
 }
 
-
-function boardTilesThatCanFall(board) {
+function findTilesThatCanFall(board) {
 	console.assert(isDef(board))
 
-	var tilesThatCanFall = []
-	function pushTile(tile) {
-		var isDuplicate = false
-		tilesThatCanFall.forEach(t => {
-			if (t[0] === tile[0] && t[1] === tile[1]) isDuplicate = true
+	var tiles = []
+	function isDuplicate(tile) {
+		var isDup = false
+		tiles.forEach(t => {
+			if (t[0] === tile[0] && t[1] === tile[1]) isDup = true
 		})
-		if (!isDuplicate) tilesThatCanFall.push(tile)
+		return isDup
 	}
+	function pushTile(tile) {
+		if (!isDuplicate(tile)) tiles.push(tile)
+	}
+
 	for (var xx = 0; xx < board.w; xx++) {
 		for (var yy = board.h - 1; yy >= 0; yy--) {
+			function tileBelowIsFree(x, y) {				
+				var tileBelow = board.tiles[y+1][x]
+				return tileBelow.type === TileType.none || isDuplicate([x, y+1])
+			}
 			var tile = board.tiles[yy][xx]
-			if (tile.type === TileType.pill && !isDef(tile.connectionDir)) {
-				// check spot below
-				if (yy+1 < board.h) {
-					var tileBelow = board.tiles[yy+1][xx]
-					if (tileBelow.type === TileType.none) {
-						pushTile([yy, xx])
-					}
+			if (tile.type !== TileType.pill) continue
+			if (yy + 1 >= board.h) continue
+
+			if (isUndef(tile.connectionDir)) {
+				// Handle loose pill
+				if (tileBelowIsFree(xx, yy)) pushTile([xx, yy])
+			} else {
+				// Handle connected pill
+				switch (tile.connectionDir) {
+					case ConnectionDir.up:
+						if (tileBelowIsFree(xx, yy)) pushTile([xx, yy])
+						break
+					case ConnectionDir.down:
+						if (tileBelowIsFree(xx, yy)) pushTile([xx, yy])
+						break
+					case ConnectionDir.left:
+						if (tileBelowIsFree(xx, yy) && tileBelowIsFree(xx-1, yy)) pushTile([xx, yy])
+						break
+					case ConnectionDir.right:
+						if (tileBelowIsFree(xx, yy) && tileBelowIsFree(xx+1, yy)) pushTile([xx, yy])
+						break
 				}
 			}
 		}
 	}
-	return tilesThatCanFall
+
+	return tiles
 }
 
 function dirToOffset(dir) {

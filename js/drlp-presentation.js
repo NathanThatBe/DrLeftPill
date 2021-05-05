@@ -63,7 +63,24 @@ function drawPillboard(ctx, board) {
 					ctx.fillRect(dX + xx * 20 - virusWidth/4, dY + yy * 20 - virusWidth/4, virusWidth / 2, virusWidth / 2)
 					break
 				case TileType.pill:
+					const pillWidth = 14
 					drawPill(ctx, xx, yy, dX, dY, tile.animation.scale)
+					if (isDef(tile.connectionDir)) {
+						switch (tile.connectionDir) {
+							case ConnectionDir.left:
+								ctx.fillRect(dX + xx * 20, dY + yy * 20 - pillWidth/2, -20/2, pillWidth)
+								break
+							case ConnectionDir.right:
+								ctx.fillRect(dX + xx * 20, dY + yy * 20 - pillWidth/2, 20/2, pillWidth)
+								break
+							case ConnectionDir.up:
+								ctx.fillRect(dX + xx * 20 - pillWidth/2, dY + yy * 20, pillWidth, -20/2)
+								break
+							case ConnectionDir.down:
+								ctx.fillRect(dX + xx * 20 - pillWidth/2, dY + yy * 20, pillWidth, 20/2)
+								break
+						}
+					}
 					break
 			}
 		}
@@ -71,13 +88,30 @@ function drawPillboard(ctx, board) {
 }
 
 function drawPlayerPill(ctx, playerPill, dX, dY) {
+	const pillWidth = 14
 	var firstColor = playerPill.isReversed ? playerPill.colors[0] : playerPill.colors[1]
 	var secondColor = playerPill.isReversed ? playerPill.colors[1] : playerPill.colors[0]
 	ctx.fillStyle = setFillColor(firstColor)
 	drawPill(ctx, playerPill.x, playerPill.y, dX, dY, 1)
+	switch (playerPill.dir) {
+		case PillDir.up:
+			ctx.fillRect(dX + playerPill.x * 20 - pillWidth/2, dY + playerPill.y * 20, pillWidth, -20/2)
+			break
+		case PillDir.right:
+			ctx.fillRect(dX + playerPill.x * 20, dY + playerPill.y * 20 - pillWidth/2, 20/2, pillWidth)
+			break
+	}
 
 	ctx.fillStyle = setFillColor(secondColor)
 	drawPill(ctx, playerPill.x + getPillDirX(playerPill.dir), playerPill.y + getPillDirY(playerPill.dir), dX, dY, 1)
+	switch (playerPill.dir) {
+		case PillDir.up:
+			ctx.fillRect(dX + (playerPill.x + getPillDirX(playerPill.dir)) * 20 - pillWidth/2, dY + (playerPill.y + getPillDirY(playerPill.dir)) * 20, pillWidth, 20/2)
+			break
+		case PillDir.right:
+			ctx.fillRect(dX + (playerPill.x + getPillDirX(playerPill.dir)) * 20, dY + (playerPill.y + getPillDirY(playerPill.dir)) * 20 - pillWidth/2, -20/2, pillWidth)
+			break
+	}
 }
 
 const ItemStatus = Object.freeze({
@@ -271,6 +305,7 @@ const ApplyGravityItem = function(context, gameState) {
 var _delay = {t: 0.3, dur: 0.3}
 return {
 	enter: () => {
+		
 	},
 	tick: () => {
 		// Update delay
@@ -289,31 +324,34 @@ return {
 		})
 
 		// Apply gravity to columns of pills
-		var tilesHaveFallen = false
-		for (var xx = 0; xx < board.w; xx++) {
-			for (var yy = board.h - 1; yy >= 0; yy--) {
-				var tile = board.tiles[yy][xx]
-				if (tile.type === TileType.pill && !isDef(tile.connectionDir)) {
-					// check spot below
-					if (yy+1 < board.h) {
-						var tileBelow = board.tiles[yy+1][xx]
-						if (tileBelow.type === TileType.none) {
-							// move tile
-							board.tiles[yy+1][xx] = tile
-							board.tiles[yy][xx] = Tile(TileType.none, TileColor.none)
-						}
-					}
-				}
-			}
-		}
-		if (boardTilesThatCanFall(board).length > 0) {
-			return ItemReturn(ItemStatus.waiting)
-		} else {
-			return ItemReturn(ItemStatus.complete, ItemEvent.appliedGravity)
-		}
+		var tilesToMove = findTilesThatCanFall(board)
+
+		if (tilesToMove.length === 0) return ItemReturn(ItemStatus.complete, ItemEvent.appliedGravity)
+
+		// Move all tiles at together
+		tilesToMove.forEach(loc => {
+			var tile = board.tiles[loc[1]][loc[0]]
+			var tileBelow = board.tiles[loc[1]+1][loc[0]]
+
+			// swap
+			board.tiles[loc[1]+1][loc[0]] = tile
+			board.tiles[loc[1]][loc[0]] = tileBelow
+		})
+		return ItemReturn(ItemStatus.waiting)
 	},
 	draw: () => {
-
+		/*
+		var ctx = context.ctx
+		var board = gameState.board
+		var tiles = findTilesThatCanFall(board)
+		tiles.forEach(tile => {
+			ctx.fillStyle = "cyan"
+			ctx.beginPath()
+			ctx.arc(board.dX + tile[0] * 20, board.dY + tile[1] * 20, 5, 0, 2*Math.PI)
+			ctx.fill()
+			ctx.closePath()
+		})
+		*/
 	},
 }
 }
