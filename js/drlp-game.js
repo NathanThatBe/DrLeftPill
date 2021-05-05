@@ -113,7 +113,7 @@ return {
 		ctx.fillStyle = "white"
 		ctx.font = "36px MONOSPACE"
 		ctx.textAlign = "left"
-		ctx.fillText("t: " + context.time.currTime.toFixed(2), 10, ctx.h - 50)
+		ctx.fillText("t: " + context.time.currTime.toFixed(2), 10, ctx.h - 16)
 
 		// Draw debug line numbers
 		ctx.fillStyle = "white"

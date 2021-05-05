@@ -46,21 +46,21 @@ function drawPillboard(ctx, board) {
 		for (var xx = 0; xx < board.w; xx++) {
 			var tile = board.tiles[yy][xx]
 
-			ctx.fillStyle = setFillColor(tile.color)
+			ctx.fillStyle = setFillColor(TileColor.none)
+			ctx.beginPath()
+			ctx.arc(dX + xx * 20, dY + yy * 20, 10, 0, 2*Math.PI)
+			ctx.fill()
+			ctx.closePath()
 
+			ctx.fillStyle = setFillColor(tile.color)			
 			switch (tile.type) {
 				case TileType.none:
-					ctx.beginPath()
-					ctx.arc(dX + xx * 20, dY + yy * 20, 10, 0, 2*Math.PI)
-					ctx.fill()
-					ctx.closePath()
 					break
 				case TileType.virus:
 					const virusWidth = 14 * tile.animation.scale
-					ctx.beginPath()
 					ctx.fillRect(dX + xx * 20 - virusWidth/2, dY + yy * 20 - virusWidth/2, virusWidth, virusWidth)
-					ctx.fill()
-					ctx.closePath()
+					ctx.fillStyle = "black"
+					ctx.fillRect(dX + xx * 20 - virusWidth/4, dY + yy * 20 - virusWidth/4, virusWidth / 2, virusWidth / 2)
 					break
 				case TileType.pill:
 					drawPill(ctx, xx, yy, dX, dY, tile.animation.scale)
