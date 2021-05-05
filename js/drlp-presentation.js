@@ -185,14 +185,15 @@ return {
 		context.input.pressed.forEach(key => {
 		switch (key.toUpperCase()) {
 			case "A":
+			case "ARROWLEFT":
 				inputDX -= 1
 				break
 			case "D":
+			case "ARROWRIGHT":
 				inputDX += 1
 				break
-
 			case "W":
-			case "Z":
+			case "ARROWUP":
 				if (playerPill.dir === PillDir.up) {
 					newDir = PillDir.right
 					newReverse = !playerPill.isReversed
@@ -223,7 +224,7 @@ return {
 		// DOWN
 		_delayMultiplier = 1
 		context.input.down.forEach(key => {
-			if (key.toUpperCase() === "S") {
+			if (key.toUpperCase() === "S" || key === "ArrowDown") {
 				_delayMultiplier = 0.1
 			}
 		})
