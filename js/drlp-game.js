@@ -11,22 +11,26 @@ _item = null
 
 const ItemStatus = Object.freeze({
 	"unknown": 0,
+	// Item done with current frame, wait for next frame.
 	"waiting": 1,
+	// Item fully complete.
 	"complete": 3,
+	// Item encountered an error.
 	"error": 4,
 })
 
 const ItemEvent = Object.freeze({
-	"unknown": 0,
-	"spawnedViruses": 1,
-	"spawnedPlayerPill": 2,
-	"droppedPlayerPill": 3,
-	"clearedCombos": 4,
-	"skippedCombos": 5,
-	"appliedGravity": 6,
-	"stageClear": 7,
-	"topOut": 8,
-	"nextTurn": 9,
+	"unknown":            0,
+	"resetGame":          1,
+	"spawnedViruses":     2,
+	"spawnedPlayerPill":  3,
+	"droppedPlayerPill":  4,
+	"clearedCombos":      5,
+	"skippedCombos":      6,
+	"appliedGravity":     7,
+	"stageClear":         8,
+	"topOut":             9,
+	"nextTurn":          10,
 })
 
 const SpawnPlayerPillItem = function(context, gameState) {
@@ -34,8 +38,8 @@ return {
 	enter: function() {
 		// Spawn player pill
 		gameState.playerPill = PlayerPill([RandomColor(), RandomColor()])
-		gameState.playerPill.x = 3 // TODO: Use constants.
-		gameState.playerPill.y = 0
+		gameState.playerPill.x = BOARD_SPAWN_P.x
+		gameState.playerPill.y = BOARD_SPAWN_P.y
 
 		gameState.playState = PlayState.playerPill
 	},
@@ -242,7 +246,6 @@ return {
 		// Find all combos
 		_tilesToRemove = findComboTiles(gameState.board)
 		if (_tilesToRemove.length === 0) _skip = true
-		//console.log("clearing combos:", _tilesToRemove)
 	},
 	tick: () => {
 		if (_skip) {
@@ -263,7 +266,6 @@ return {
 		boardTile.animation.scale = t
 
 		if (_delay.t >= _delay.dur) {
-			//console.log("finished tile:", tile)
 			gameState.board.tiles[tile[1]][tile[0]] = Tile(TileType.none, TileColor.none)
 			_tilesToRemove.shift()
 			_delay.t = 0
@@ -319,40 +321,11 @@ return {
 }
 }
 
-// Queueing
-
-function queuePush(item) {
-	var ii = item(context, _gameState)
-	_queue.push(item(context, _gameState))
-}
-
-function queuePop() {
-	_item = _queue.shift()
-	if (_item) _item.enter()
-}
-
-function queueHasItem() {
-	return isDef(_item)
-}
-
-function queueTick() {
-	console.assert(queueHasItem())
-	return _item.tick()
-}
-
-function queueDraw() {
-	if (!queueHasItem()) return
-	if (isUndef(_item.draw)) return
-	_item.draw()
-}
-
-function resetGame() {
-	_gameState = GameState()
-	queuePush(SpawnVirusItem)
-}
-
 function switchItem(event) {
 	switch (event) {
+		case ItemEvent.resetGame:
+			queuePush(SpawnVirusItem)
+			break
 		case ItemEvent.spawnedViruses:
 			queuePush(SpawnPlayerPillItem)
 			break
@@ -384,10 +357,38 @@ function switchItem(event) {
 	}
 }
 
+// Queueing
+
+function queuePush(item) {
+	var ii = item(context, _gameState)
+	_queue.push(item(context, _gameState))
+}
+
+function queuePop() {
+	_item = _queue.shift()
+	if (_item) _item.enter()
+}
+
+function queueHasItem() {
+	return isDef(_item)
+}
+
+function queueTick() {
+	console.assert(queueHasItem())
+	return _item.tick()
+}
+
+function queueDraw() {
+	if (!queueHasItem()) return
+	if (isUndef(_item.draw)) return
+	_item.draw()
+}
+
 return {
 	enter: function() {
 		console.log("DrLeftPillGame - ENTER")
-		resetGame()
+		_gameState = GameState()
+		switchItem(ItemEvent.resetGame)
 	},
 	tick: function() {
 		if (!queueHasItem()) {

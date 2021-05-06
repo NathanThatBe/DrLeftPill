@@ -1,5 +1,11 @@
 "use strict"
 
+// Constants
+
+const BOARD_W = 8
+const BOARD_H = 16
+const BOARD_SPAWN_P = { x: 3, y: 0 }
+
 // Math Helpers
 
 function isDef(obj) {
@@ -84,24 +90,22 @@ return {
 }
 
 const PillBoard = function() {
-const ROWS = 16
-const COLS = 8
 var _tiles = []
 var board = {
-	w: COLS,
-	h: ROWS,
+	w: BOARD_W,
+	h: BOARD_H,
 	tiles: _tiles,
 	getTileType: (x, y) => { return _tiles[y][x].type },
 	isOutOfBounds: (x, y) => {
-		if (x < 0 || x >= COLS || y < 0 || y >= ROWS) {
+		if (x < 0 || x >= BOARD_W || y < 0 || y >= BOARD_H) {
 			return true
 		}
 		return false
 	},
 }
-for (var yy = 0; yy < ROWS; yy++) {
+for (var yy = 0; yy < BOARD_H; yy++) {
 	var tileRow = []
-	for (var xx = 0; xx < COLS; xx++) {
+	for (var xx = 0; xx < BOARD_W; xx++) {
 		var tile = Tile(TileType.none, TileColor.none)
 		tileRow.push(tile)
 	}
