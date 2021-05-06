@@ -18,7 +18,7 @@ document.body.appendChild(_canvas)
 console.log("ARCADO - INIT")
 
 return {
-	run: function(runnable) {
+	run: (runnable) => {
 		let context = {}
 		// Timing
 		context.time = {}
@@ -38,7 +38,7 @@ return {
 			context.input.pressed = [];
 			context.input.released = [];
 		}
-		document.onkeydown = function(event) {
+		document.onkeydown = (event) => {
 			if (["Space", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].indexOf(event.code) > -1) {
 				event.preventDefault()
 			}
@@ -50,7 +50,7 @@ return {
 				context.input.down.push(event.key);	
 			}
 		}
-		document.onkeyup = function(event) {
+		document.onkeyup = (event) => {
 			const ii = context.input.down.indexOf(event.key);
 			if (ii < 0) return;
 			context.input.down.splice(ii, 1);

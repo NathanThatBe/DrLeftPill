@@ -33,10 +33,9 @@ const ItemEvent = Object.freeze({
 	"nextTurn":          10,
 })
 
-const SpawnPlayerPillItem = function(context, gameState) {
+const SpawnPlayerPillItem = (context, gameState) => {
 return {
 	enter: function() {
-		// Spawn player pill
 		gameState.playerPill = PlayerPill([RandomColor(), RandomColor()])
 		gameState.playerPill.x = BOARD_SPAWN_P.x
 		gameState.playerPill.y = BOARD_SPAWN_P.y
@@ -50,7 +49,7 @@ return {
 }
 }
 
-const SpawnVirusItem = function(context, gameState) {
+const SpawnVirusItem = (context, gameState) => {
 var _elapsed = 0
 var _viruses = []
 return {
@@ -64,7 +63,7 @@ return {
 				if (Math.random() > spawnTolerance) {
 					var virus = Tile(TileType.virus, RandomColor())
 					virus.animation.scale = 0
-					virus.animation.spawnDelay = 0 //randomRange(0.15, 0.25)
+					virus.animation.spawnDelay = 0
 					_viruses.push(virus)
 					gameState.board.tiles[yy][xx] = virus
 				}	
@@ -95,7 +94,7 @@ return {
 }
 }
 
-const DropPlayerPillItem = function(context, gameState) {
+const DropPlayerPillItem = (context, gameState) => {
 var _delayMultiplier = 1
 var _dropDelay = 0.5
 var _currTime = 0
@@ -192,7 +191,7 @@ return {
 }
 }
 
-const ApplyGravityItem = function(context, gameState) {
+const ApplyGravityItem = (context, gameState) => {
 var _delay = {t: 0.3, dur: 0.3}
 return {
 	enter: () => {
@@ -237,7 +236,7 @@ return {
 }
 }
 
-const CheckComboItem = function(context, gameState) {
+const CheckComboItem = (context, gameState) => {
 var _tilesToRemove = null
 var _delay = {t: 0, dur: 0.2}
 var _skip = false
@@ -288,7 +287,7 @@ return {
 }
 }
 
-const CheckEndGameItem = function(context, gameState) {
+const CheckEndGameItem = (context, gameState) => {
 return {
 	enter: () => {
 	},
@@ -385,12 +384,12 @@ function queueDraw() {
 }
 
 return {
-	enter: function() {
+	enter: () => {
 		console.log("DrLeftPillGame - ENTER")
 		_gameState = GameState()
 		switchItem(ItemEvent.resetGame)
 	},
-	tick: function() {
+	tick: () => {
 		if (!queueHasItem()) {
 			queuePop()
 		}
@@ -414,7 +413,7 @@ return {
 				break
 		}
 	},
-	draw: function() {
+	draw: () => {
 		var ctx = context.ctx
 		ctx.fillStyle = DARK_PURPLE
 		ctx.fillRect(0, 0, ctx.w, ctx.h)
@@ -436,5 +435,3 @@ return {
 	},
 }
 }
-
-Arcado.run(DrLeftPillGame)

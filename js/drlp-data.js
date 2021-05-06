@@ -49,13 +49,13 @@ const TileColor = Object.freeze({
 	"yellow": 3,
 })
 
-const Animation = function() {
+const Animation = () => {
 return {
 	scale: 1
 }
 }
 
-const Tile = function(tileType, tileColor) {
+const Tile = (tileType, tileColor) => {
 console.assert(isDef(tileType))
 console.assert(isDef(tileColor))
 return {
@@ -78,7 +78,7 @@ const ConnectionDir = Object.freeze({
 	"right": 3,
 })
 
-const PlayerPill = function(colors) {
+const PlayerPill = (colors) => {
 console.assert(isDef(colors))
 return {
 	x: 0,
@@ -89,7 +89,7 @@ return {
 }
 }
 
-const PillBoard = function() {
+const PillBoard = () => {
 var _tiles = []
 var board = {
 	w: BOARD_W,
@@ -123,7 +123,7 @@ const PlayState = Object.freeze({
 	"stageClear": 5
 })
 
-const GameState = function() {
+const GameState = () => {
 return {
 	board: PillBoard(),
 	playerPill: null,
