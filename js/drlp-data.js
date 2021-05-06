@@ -1,5 +1,7 @@
 "use strict"
 
+// Math Helpers
+
 function isDef(obj) {
 	return obj !== undefined && obj !== null;
 }

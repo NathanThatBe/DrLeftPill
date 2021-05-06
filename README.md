@@ -2,6 +2,7 @@
 Dr. Mario Clone in JS
 
 TODO:
-- Add queue, migrate game logic
+- Fix falling logic
+- Add end conditions
 - Scoring
-- Polish timings
+- Add next pill indicator
