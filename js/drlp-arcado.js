@@ -1,14 +1,19 @@
 "use strict"
 
+const W = 500
+const H = 500
+
 const Arcado = function() {
 var _paused = false
 // Create canvas with 2D drawing context
 let _canvas = document.createElement("canvas")
 let _ctx = _canvas.getContext("2d")
 let ratio = window.devicePixelRatio || 1
-_canvas.width = Math.floor(500 * ratio)
-_canvas.height = Math.floor(500 * ratio)
+_canvas.width = W * ratio
+_canvas.height = H * ratio
 _ctx.scale(ratio, ratio)
+_canvas.style.width = W + "px"
+_canvas.style.height = H + "px"
 document.body.appendChild(_canvas)
 console.log("ARCADO - INIT")
 
@@ -21,8 +26,8 @@ return {
 		context.time.timeStep = 0
 		// Drawing
 		context.ctx = _ctx
-		context.ctx.w = 500
-		context.ctx.h = 500
+		context.ctx.w = W
+		context.ctx.h = H
 		// Input
 		context.input = {
 			pressed: [],

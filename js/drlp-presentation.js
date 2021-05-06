@@ -1,12 +1,14 @@
 "use strict"
 
-const DARK_PURPLE = "#1D071F"
+const TILE_SIZE = 20
+const PILL_RADIUS = TILE_SIZE * 0.75
 
+const DARK_PURPLE = "#1D071F"
 
 function setFillColor(color) {
 switch (color) {
 	case TileColor.none:
-		return "#505050EE"
+		return "#505050FF"
 	case TileColor.red:
 		return "#EB395AFF"
 	case TileColor.blue:
@@ -29,9 +31,9 @@ function RandomColor() {
 
 
 function drawPill(ctx, x, y, dX, dY, scale) {
-	const pillWidth = 14/2 * scale
+	const pW = PILL_RADIUS/2 * scale
 	ctx.beginPath()
-	ctx.arc(dX + x * 20, dY + y * 20, pillWidth, 0, 2*Math.PI)
+	ctx.arc(dX + x * TILE_SIZE, dY + y * TILE_SIZE, pW, 0, 2*Math.PI)
 	ctx.fill()
 	ctx.closePath()
 }
@@ -42,15 +44,21 @@ function drawPillboard(ctx, board) {
 
 	var dX = board.dX
 	var dY = board.dY
+
+	// Draw BG
+	ctx.fillStyle = setFillColor(TileColor.none)
+	for (var yy = 0; yy < board.h; yy++) {
+		for (var xx = 0; xx < board.w; xx++) {
+			ctx.beginPath()
+			ctx.arc(dX + xx * TILE_SIZE, dY + yy * TILE_SIZE, TILE_SIZE*0.55, 0, 2*Math.PI)
+			ctx.fill()
+			ctx.closePath()
+		}
+	}
+
 	for (var yy = 0; yy < board.h; yy++) {
 		for (var xx = 0; xx < board.w; xx++) {
 			var tile = board.tiles[yy][xx]
-
-			ctx.fillStyle = setFillColor(TileColor.none)
-			ctx.beginPath()
-			ctx.arc(dX + xx * 20, dY + yy * 20, 10, 0, 2*Math.PI)
-			ctx.fill()
-			ctx.closePath()
 
 			ctx.fillStyle = setFillColor(tile.color)			
 			switch (tile.type) {
@@ -58,26 +66,25 @@ function drawPillboard(ctx, board) {
 					break
 				case TileType.virus:
 					const virusWidth = 14 * tile.animation.scale
-					ctx.fillRect(dX + xx * 20 - virusWidth/2, dY + yy * 20 - virusWidth/2, virusWidth, virusWidth)
+					ctx.fillRect(dX + xx * TILE_SIZE - virusWidth/2, dY + yy * TILE_SIZE - virusWidth/2, virusWidth, virusWidth)
 					ctx.fillStyle = "black"
-					ctx.fillRect(dX + xx * 20 - virusWidth/4, dY + yy * 20 - virusWidth/4, virusWidth / 2, virusWidth / 2)
+					ctx.fillRect(dX + xx * TILE_SIZE - virusWidth/4, dY + yy * TILE_SIZE - virusWidth/4, virusWidth / 2, virusWidth / 2)
 					break
 				case TileType.pill:
-					const pillWidth = 14
 					drawPill(ctx, xx, yy, dX, dY, tile.animation.scale)
 					if (isDef(tile.connectionDir)) {
 						switch (tile.connectionDir) {
 							case ConnectionDir.left:
-								ctx.fillRect(dX + xx * 20, dY + yy * 20 - pillWidth/2, -20/2, pillWidth)
+								ctx.fillRect(dX + xx * TILE_SIZE, dY + yy * TILE_SIZE - PILL_RADIUS/2, -TILE_SIZE/2, PILL_RADIUS)
 								break
 							case ConnectionDir.right:
-								ctx.fillRect(dX + xx * 20, dY + yy * 20 - pillWidth/2, 20/2, pillWidth)
+								ctx.fillRect(dX + xx * TILE_SIZE, dY + yy * TILE_SIZE - PILL_RADIUS/2, TILE_SIZE/2, PILL_RADIUS)
 								break
 							case ConnectionDir.up:
-								ctx.fillRect(dX + xx * 20 - pillWidth/2, dY + yy * 20, pillWidth, -20/2)
+								ctx.fillRect(dX + xx * TILE_SIZE - PILL_RADIUS/2, dY + yy * TILE_SIZE, PILL_RADIUS, -TILE_SIZE/2)
 								break
 							case ConnectionDir.down:
-								ctx.fillRect(dX + xx * 20 - pillWidth/2, dY + yy * 20, pillWidth, 20/2)
+								ctx.fillRect(dX + xx * TILE_SIZE - PILL_RADIUS/2, dY + yy * TILE_SIZE, PILL_RADIUS, TILE_SIZE/2)
 								break
 						}
 					}
@@ -85,20 +92,30 @@ function drawPillboard(ctx, board) {
 			}
 		}
 	}
+
+	// Draw debug line numbers
+	ctx.fillStyle = "white"
+	ctx.font = "20px MONOSPACE"
+	ctx.textAlign = "right"
+	for (var yy = 0; yy < board.h; yy++) {
+		ctx.fillText(yy, dX - TILE_SIZE, dY + yy*TILE_SIZE + 4)
+	}
+	for (var xx = 0; xx < board.w; xx++) {
+		ctx.fillText(xx, dX + xx*TILE_SIZE + 2, dY - TILE_SIZE)
+	}
 }
 
 function drawPlayerPill(ctx, playerPill, dX, dY) {
-	const pillWidth = 14
 	var firstColor = playerPill.isReversed ? playerPill.colors[0] : playerPill.colors[1]
 	var secondColor = playerPill.isReversed ? playerPill.colors[1] : playerPill.colors[0]
 	ctx.fillStyle = setFillColor(firstColor)
 	drawPill(ctx, playerPill.x, playerPill.y, dX, dY, 1)
 	switch (playerPill.dir) {
 		case PillDir.up:
-			ctx.fillRect(dX + playerPill.x * 20 - pillWidth/2, dY + playerPill.y * 20, pillWidth, -20/2)
+			ctx.fillRect(dX + playerPill.x * TILE_SIZE - PILL_RADIUS/2, dY + playerPill.y * TILE_SIZE, PILL_RADIUS, -TILE_SIZE/2)
 			break
 		case PillDir.right:
-			ctx.fillRect(dX + playerPill.x * 20, dY + playerPill.y * 20 - pillWidth/2, 20/2, pillWidth)
+			ctx.fillRect(dX + playerPill.x * TILE_SIZE, dY + playerPill.y * TILE_SIZE - PILL_RADIUS/2, TILE_SIZE/2, PILL_RADIUS)
 			break
 	}
 
@@ -106,10 +123,10 @@ function drawPlayerPill(ctx, playerPill, dX, dY) {
 	drawPill(ctx, playerPill.x + getPillDirX(playerPill.dir), playerPill.y + getPillDirY(playerPill.dir), dX, dY, 1)
 	switch (playerPill.dir) {
 		case PillDir.up:
-			ctx.fillRect(dX + (playerPill.x + getPillDirX(playerPill.dir)) * 20 - pillWidth/2, dY + (playerPill.y + getPillDirY(playerPill.dir)) * 20, pillWidth, 20/2)
+			ctx.fillRect(dX + (playerPill.x + getPillDirX(playerPill.dir)) * TILE_SIZE - PILL_RADIUS/2, dY + (playerPill.y + getPillDirY(playerPill.dir)) * TILE_SIZE, PILL_RADIUS, TILE_SIZE/2)
 			break
 		case PillDir.right:
-			ctx.fillRect(dX + (playerPill.x + getPillDirX(playerPill.dir)) * 20, dY + (playerPill.y + getPillDirY(playerPill.dir)) * 20 - pillWidth/2, -20/2, pillWidth)
+			ctx.fillRect(dX + (playerPill.x + getPillDirX(playerPill.dir)) * TILE_SIZE, dY + (playerPill.y + getPillDirY(playerPill.dir)) * TILE_SIZE - PILL_RADIUS/2, -TILE_SIZE/2, PILL_RADIUS)
 			break
 	}
 }
@@ -209,7 +226,6 @@ var _dropDelay = 0.5
 var _currTime = 0
 return {
 	enter: function() {
-		//console.log(gameState.board)
 	},
 	tick: function() {
 		console.assert(isDef(gameState.playerPill))
@@ -340,18 +356,6 @@ return {
 		return ItemReturn(ItemStatus.waiting)
 	},
 	draw: () => {
-		/*
-		var ctx = context.ctx
-		var board = gameState.board
-		var tiles = findTilesThatCanFall(board)
-		tiles.forEach(tile => {
-			ctx.fillStyle = "cyan"
-			ctx.beginPath()
-			ctx.arc(board.dX + tile[0] * 20, board.dY + tile[1] * 20, 5, 0, 2*Math.PI)
-			ctx.fill()
-			ctx.closePath()
-		})
-		*/
 	},
 }
 }
@@ -399,7 +403,7 @@ return {
 		ctx.strokeStyle = "white"
 		_tilesToRemove.forEach(tile => {
 			ctx.beginPath()
-			ctx.arc(board.dX + tile[0] * 20, board.dY + tile[1] * 20, 12, 0, 2*Math.PI)
+			ctx.arc(board.dX + tile[0] * TILE_SIZE, board.dY + tile[1] * TILE_SIZE, 12, 0, 2*Math.PI)
 			ctx.stroke()
 			ctx.closePath()
 		})

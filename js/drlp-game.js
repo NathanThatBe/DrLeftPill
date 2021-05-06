@@ -115,23 +115,6 @@ return {
 
 		// Draw item
 		queueDraw()
-
-		// Draw debug text.
-		ctx.fillStyle = "white"
-		ctx.font = "36px MONOSPACE"
-		ctx.textAlign = "left"
-		ctx.fillText("t: " + context.time.currTime.toFixed(2), 10, ctx.h - 16)
-
-		// Draw debug line numbers
-		ctx.fillStyle = "white"
-		ctx.font = "14px MONOSPACE"
-		ctx.textAlign = "right"
-		for (var yy = 0; yy < _gameState.board.h; yy++) {
-			ctx.fillText(yy, dX - 20, dY + yy*20 + 4)
-		}
-		for (var xx = 0; xx < _gameState.board.w; xx++) {
-			ctx.fillText(xx, dX + xx*20 + 2, dY - 20)
-		}
 	},
 }
 }

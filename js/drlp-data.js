@@ -173,7 +173,6 @@ function convertFloatingPills(board) {
 	// Pill can be disconnected if:
 	// 1. Other pill end is gone
 	// 2. (Hori) Both pill ends floating
-	// 3. (Vert) Pill is floating
 
 	var pillsToBeBroken = []
 	function pushTile(tile) {
@@ -214,22 +213,6 @@ function convertFloatingPills(board) {
 			}
 		}
 	}
-
-	// 3.
-	/*
-	for (var yy = 0; yy < board.h; yy++) {
-		for (var xx = 0; xx < board.w; xx++) {
-			var tile = board.tiles[yy][xx]
-			if (isDef(tile.connectionDir) && tile.connectionDir === PillDir.up) {
-				var tileBelow = findTileBelow(board, xx, yy)
-				if (!isDef(tileBelow)) continue
-				if (tileBelow.type === TileType.none) {
-					pushTile([xx, yy])
-				}
-			}
-		}
-	}
-	*/
 
 	return pillsToBeBroken
 }
