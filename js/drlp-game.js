@@ -35,14 +35,14 @@ const ItemEvent = Object.freeze({
 
 const SpawnPlayerPillItem = (context, gameState) => {
 return {
-	enter: function() {
+	enter: () => {
 		gameState.playerPill = PlayerPill([RandomColor(), RandomColor()])
 		gameState.playerPill.x = BOARD_SPAWN_P.x
 		gameState.playerPill.y = BOARD_SPAWN_P.y
 
 		gameState.playState = PlayState.playerPill
 	},
-	tick: function() {
+	tick: () => {
 		return { status: ItemStatus.complete, event: ItemEvent.spawnedPlayerPill }
 	},
 	draw: null,
@@ -53,7 +53,7 @@ const SpawnVirusItem = (context, gameState) => {
 var _elapsed = 0
 var _viruses = []
 return {
-	enter: function() {
+	enter: () => {
 		console.assert(isDef(gameState.board))
 		// Generate random virus pattern
 		var maxHeight = 5
@@ -70,7 +70,7 @@ return {
 			}
 		}
 	},
-	tick: function() {
+	tick: () => {
 		_elapsed += context.time.timeStep
 
 		var allDone = true
@@ -99,9 +99,9 @@ var _delayMultiplier = 1
 var _dropDelay = 0.5
 var _currTime = 0
 return {
-	enter: function() {
+	enter: () => {
 	},
-	tick: function() {
+	tick: () => {
 		console.assert(isDef(gameState.playerPill))
 		var playerPill = gameState.playerPill
 
