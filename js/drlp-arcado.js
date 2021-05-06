@@ -3,7 +3,7 @@
 const W = 500
 const H = 500
 
-const Arcado = () => {
+const Arcado = function() {
 var _paused = false
 // Create canvas with 2D drawing context
 let _canvas = document.createElement("canvas")
