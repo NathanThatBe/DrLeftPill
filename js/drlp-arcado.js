@@ -17,7 +17,8 @@ _canvas.height = H * ratio
 _ctx.scale(ratio, ratio)
 _canvas.style.width = W + "px"
 _canvas.style.height = H + "px"
-document.body.appendChild(_canvas)
+let containerDiv = document.getElementById("arcado-container")
+containerDiv.appendChild(_canvas)
 console.log("ARCADO - INIT")
 
 return {
