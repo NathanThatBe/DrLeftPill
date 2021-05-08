@@ -145,6 +145,7 @@ return {
 					var virus = Tile(TileType.virus, RandomColor())
 					virus.animation.scale = 0
 					virus.animation.spawnDelay = 0
+					virus.animation.offset = { x: randomRange(0, 1), y: randomRange(0, 1) }
 					_viruses.push(virus)
 					gameState.board.tiles[yy][xx] = virus
 				}	
@@ -353,6 +354,13 @@ return {
 			return { status: ItemStatus.complete, event: ItemEvent.clearedCombos }
 		}
 
+		// Shake all tiles at the same time.
+		_tilesToRemove.forEach(tile => { 
+			gameState.board.tiles[tile[1]][tile[0]].animation.offset.x = randomRange(-5, 5)
+			gameState.board.tiles[tile[1]][tile[0]].y = randomRange(-5, 5)
+		})
+
+
 		// Scale 1 tile at a time
 		var tile = _tilesToRemove[0]
 		_delay.t += context.time.timeStep
@@ -360,7 +368,7 @@ return {
 		var t = lerp(1, 0, Math.min(1, _delay.t / _delay.dur))
 		var boardTile = gameState.board.tiles[tile[1]][tile[0]]
 		boardTile.animation.scale = t
-
+		
 		if (_delay.t >= _delay.dur) {
 			gameState.board.tiles[tile[1]][tile[0]] = Tile(TileType.none, TileColor.none)
 			_tilesToRemove.shift()

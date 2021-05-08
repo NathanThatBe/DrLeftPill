@@ -218,14 +218,15 @@ function drawPillboard(ctx, board) {
 				case TileType.none:
 					break
 				case TileType.virus:
+					var offset = tile.animation.offset
 					const virusWidth = pillRadius * tile.animation.scale
-					ctx.fillRect(dX + xx * size - virusWidth/2, dY + yy * size - virusWidth/2, virusWidth, virusWidth)
+					ctx.fillRect(dX + xx * size - virusWidth/2 + offset.x, dY + yy * size - virusWidth/2 + offset.y, virusWidth, virusWidth)
 					ctx.fillStyle = "black"
 					ctx.fillRect(dX + xx * size - virusWidth/4, dY + yy * size - virusWidth/4, virusWidth / 2, virusWidth / 2)
 					break
 				case TileType.pill:
 				   	if (isUndef(tile.connectionDir)) {
-				   		newDrawPill(ctx, dX + xx * size, dY + yy * size, size*0.4, setFillColor(tile.color))
+				   		newDrawPill(ctx, dX + xx * size + tile.animation.offset.x, dY + yy * size + tile.animation.offset.y, size*0.4, setFillColor(tile.color))
 				   	} else {
 				   		var otherTile = null
 				   		var pillDir = null
