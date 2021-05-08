@@ -1,19 +1,27 @@
 "use strict"
 
+const MAX_W = 500
+const W = MAX_W
+const H = MAX_W * (144/160)
+
 const Arcado = function() {
 var _paused = false
+var _debug = true
+
 // Create canvas with 2D drawing context
 let _canvas = document.createElement("canvas")
 let _ctx = _canvas.getContext("2d")
 let ratio = window.devicePixelRatio || 1
-_canvas.width = Math.floor(500 * ratio)
-_canvas.height = Math.floor(500 * ratio)
+_canvas.width = W * ratio
+_canvas.height = H * ratio
 _ctx.scale(ratio, ratio)
+_canvas.style.width = W + "px"
+_canvas.style.height = H + "px"
 document.body.appendChild(_canvas)
 console.log("ARCADO - INIT")
 
 return {
-	run: function(runnable) {
+	run: (runnable) => {
 		let context = {}
 		// Timing
 		context.time = {}
@@ -21,8 +29,9 @@ return {
 		context.time.timeStep = 0
 		// Drawing
 		context.ctx = _ctx
-		context.ctx.w = 500
-		context.ctx.h = 500
+		context.ctx.w = W
+		context.ctx.h = H
+		context.ctx.safeMargin = W * 0.05
 		// Input
 		context.input = {
 			pressed: [],
@@ -33,7 +42,7 @@ return {
 			context.input.pressed = [];
 			context.input.released = [];
 		}
-		document.onkeydown = function(event) {
+		document.onkeydown = (event) => {
 			if (["Space", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].indexOf(event.code) > -1) {
 				event.preventDefault()
 			}
@@ -45,7 +54,7 @@ return {
 				context.input.down.push(event.key);	
 			}
 		}
-		document.onkeyup = function(event) {
+		document.onkeyup = (event) => {
 			const ii = context.input.down.indexOf(event.key);
 			if (ii < 0) return;
 			context.input.down.splice(ii, 1);
@@ -83,6 +92,41 @@ return {
 			instance.tick()
 			instance.draw()
 			updateInput();
+
+			// Draw debug.
+			if (_debug) {
+				var ctx = _ctx
+				ctx.lineWidth = 1
+
+				// Safe margin
+				var margin = ctx.safeMargin
+				ctx.strokeStyle = "#d62246" + "99"
+				ctx.strokeRect(margin, margin, ctx.w - margin*2, ctx.h - margin*2)
+
+				// Rule of thirds
+				ctx.strokeStyle = "#d4f4dd" + "55"
+				ctx.beginPath()
+				ctx.moveTo(ctx.w * 0.33, 0)
+				ctx.lineTo(ctx.w * 0.33, ctx.h)
+				ctx.moveTo(ctx.w * 0.66, 0)
+				ctx.lineTo(ctx.w * 0.66, ctx.h)
+				ctx.moveTo(0, ctx.h * 0.33)
+				ctx.lineTo(ctx.w, ctx.h * 0.33)
+				ctx.moveTo(0, ctx.h * 0.66)
+				ctx.lineTo(ctx.w, ctx.h * 0.66)
+				ctx.stroke()
+				ctx.closePath()
+
+				// Centered cross
+				ctx.strokeStyle = "#17bebb" + "88"
+				ctx.beginPath()
+				ctx.moveTo(ctx.w/2, 0)
+				ctx.lineTo(ctx.w/2, ctx.h)
+				ctx.moveTo(0, ctx.h/2)
+				ctx.lineTo(ctx.w, ctx.h/2)
+				ctx.stroke()
+				ctx.closePath()
+			}
 
 			// Restart loop
 			window.requestAnimationFrame(loop);

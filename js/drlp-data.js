@@ -1,5 +1,13 @@
 "use strict"
 
+// Constants
+
+const BOARD_W = 8
+const BOARD_H = 16
+const BOARD_SPAWN_P = { x: 3, y: 0 }
+
+// Math Helpers
+
 function isDef(obj) {
 	return obj !== undefined && obj !== null;
 }
@@ -41,13 +49,13 @@ const TileColor = Object.freeze({
 	"yellow": 3,
 })
 
-const Animation = function() {
+const Animation = () => {
 return {
 	scale: 1
 }
 }
 
-const Tile = function(tileType, tileColor) {
+const Tile = (tileType, tileColor) => {
 console.assert(isDef(tileType))
 console.assert(isDef(tileColor))
 return {
@@ -70,7 +78,7 @@ const ConnectionDir = Object.freeze({
 	"right": 3,
 })
 
-const PlayerPill = function(colors) {
+const PlayerPill = (colors) => {
 console.assert(isDef(colors))
 return {
 	x: 0,
@@ -81,25 +89,25 @@ return {
 }
 }
 
-const PillBoard = function() {
-const ROWS = 16
-const COLS = 8
+const PillBoard = () => {
 var _tiles = []
 var board = {
-	w: COLS,
-	h: ROWS,
+	w: BOARD_W,
+	h: BOARD_H,
+	tileSize: 0,
+	rect: null,
 	tiles: _tiles,
 	getTileType: (x, y) => { return _tiles[y][x].type },
 	isOutOfBounds: (x, y) => {
-		if (x < 0 || x >= COLS || y < 0 || y >= ROWS) {
+		if (x < 0 || x >= BOARD_W || y < 0 || y >= BOARD_H) {
 			return true
 		}
 		return false
 	},
 }
-for (var yy = 0; yy < ROWS; yy++) {
+for (var yy = 0; yy < BOARD_H; yy++) {
 	var tileRow = []
-	for (var xx = 0; xx < COLS; xx++) {
+	for (var xx = 0; xx < BOARD_W; xx++) {
 		var tile = Tile(TileType.none, TileColor.none)
 		tileRow.push(tile)
 	}
@@ -116,15 +124,6 @@ const PlayState = Object.freeze({
 	"topOut": 4,
 	"stageClear": 5
 })
-
-const GameState = function() {
-return {
-	board: PillBoard(),
-	playerPill: null,
-	playState: PlayState.none,
-	paused: false
-}
-}
 
 function getPillDirX(dir) {
 	console.assert(isDef(dir))
@@ -173,7 +172,6 @@ function convertFloatingPills(board) {
 	// Pill can be disconnected if:
 	// 1. Other pill end is gone
 	// 2. (Hori) Both pill ends floating
-	// 3. (Vert) Pill is floating
 
 	var pillsToBeBroken = []
 	function pushTile(tile) {
@@ -214,22 +212,6 @@ function convertFloatingPills(board) {
 			}
 		}
 	}
-
-	// 3.
-	/*
-	for (var yy = 0; yy < board.h; yy++) {
-		for (var xx = 0; xx < board.w; xx++) {
-			var tile = board.tiles[yy][xx]
-			if (isDef(tile.connectionDir) && tile.connectionDir === PillDir.up) {
-				var tileBelow = findTileBelow(board, xx, yy)
-				if (!isDef(tileBelow)) continue
-				if (tileBelow.type === TileType.none) {
-					pushTile([xx, yy])
-				}
-			}
-		}
-	}
-	*/
 
 	return pillsToBeBroken
 }
