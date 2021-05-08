@@ -2,6 +2,9 @@
 
 const DrLeftPillMenu = (context) => {
 
+// Debug
+var _skipToGame = true
+
 var _queue = []
 var _item = null
 
@@ -159,7 +162,11 @@ function queueDraw() {
 
 return {
 	enter: () => {
-		switchItem(ItemEvent.playIntro)
+		if (_skipToGame) {
+			switchItem(ItemEvent.goToGame)
+		} else {
+			switchItem(ItemEvent.playIntro)
+		}
 	},
 	tick: () => {
 		if (!queueHasItem()) {

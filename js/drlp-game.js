@@ -43,23 +43,46 @@ const ItemEvent = Object.freeze({
 })
 
 const SpawnPlayerPillItem = (gameState) => {
+var _animation = { t: 0, dur: 0.2 }
+var _shouldAnimate = true
+var _flipPill = null
 return {
 	enter: () => {
 		if (isUndef(gameState.nextPill)) {
 			gameState.nextPill = PlayerPill([RandomColor(), RandomColor()])
+			_shouldAnimate = false
 		}
 
-		gameState.playerPill = gameState.nextPill
-		//gameState.playerPill = PlayerPill([RandomColor(), RandomColor()])
-		gameState.playerPill.x = BOARD_SPAWN_P.x
-		gameState.playerPill.y = BOARD_SPAWN_P.y
-
-		gameState.nextPill = PlayerPill([RandomColor(), RandomColor()])
+		_flipPill = gameState.nextPill
+		gameState.nextPill = null
 	},
 	tick: () => {
+		_animation.t += context.time.timeStep
+		if (_animation.t < _animation.dur) return
+
+		_animation.t = _animation.dur
+
+		gameState.playerPill = _flipPill
+		gameState.playerPill.x = BOARD_SPAWN_P.x
+		gameState.playerPill.y = BOARD_SPAWN_P.y
+		gameState.nextPill = PlayerPill([RandomColor(), RandomColor()])
+		
 		return { status: ItemStatus.complete, event: ItemEvent.spawnedPlayerPill }
 	},
-	draw: null,
+	draw: () => {
+		var ctx = context.ctx
+
+		var t = _animation.t / _animation.dur
+		var startX = ctx.w * 0.7
+		var startY = ctx.h * 0.3
+		var endX = gameState.board.dX + BOARD_SPAWN_P.x * 20
+		var endY = gameState.board.dY + BOARD_SPAWN_P.y * 20
+
+		var x = lerp(startX, endX, t)
+		var y = lerp(startY, endY, t)
+
+		drawPlayerPill(ctx, _flipPill, x, y)
+	},
 }
 }
 
@@ -411,6 +434,10 @@ return {
 		if (!queueHasItem()) return
 
 		const itemReturn = queueTick()
+		if (isUndef(itemReturn)) {
+			// Assume item is waiting.
+			return
+		}
 		switch (itemReturn.status) {
 			case ItemStatus.unknown:
 				console.assert(false)
