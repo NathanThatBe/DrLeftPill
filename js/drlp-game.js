@@ -569,7 +569,6 @@ return {
 			drawPlayerPill(ctx, _gameState.nextPill, pX, pY, board.tileSize, 0)
 		}
 
-
 		// Draw item
 		queueDraw()
 	},
