@@ -12,7 +12,6 @@ const GameState = () => {
 return {
 	board: PillBoard(),
 	playerPill: null,
-	playState: PlayState.none,
 	paused: false
 }
 }
@@ -49,8 +48,6 @@ return {
 		gameState.playerPill = PlayerPill([RandomColor(), RandomColor()])
 		gameState.playerPill.x = BOARD_SPAWN_P.x
 		gameState.playerPill.y = BOARD_SPAWN_P.y
-
-		gameState.playState = PlayState.playerPill
 	},
 	tick: () => {
 		return { status: ItemStatus.complete, event: ItemEvent.spawnedPlayerPill }
