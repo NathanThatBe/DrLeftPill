@@ -7,6 +7,15 @@ _gameState = null
 _queue = []
 _item = null
 
+const GameState = () => {
+return {
+	board: PillBoard(),
+	playerPill: null,
+	playState: PlayState.none,
+	paused: false
+}
+}
+
 // Items
 
 const ItemStatus = Object.freeze({

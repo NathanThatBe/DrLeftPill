@@ -123,15 +123,6 @@ const PlayState = Object.freeze({
 	"stageClear": 5
 })
 
-const GameState = () => {
-return {
-	board: PillBoard(),
-	playerPill: null,
-	playState: PlayState.none,
-	paused: false
-}
-}
-
 function getPillDirX(dir) {
 	console.assert(isDef(dir))
 	switch (dir) {
