@@ -6,6 +6,8 @@ const H = MAX_W * (144/160)
 
 const Arcado = function() {
 var _paused = false
+var _debug = true
+
 // Create canvas with 2D drawing context
 let _canvas = document.createElement("canvas")
 let _ctx = _canvas.getContext("2d")
@@ -89,6 +91,40 @@ return {
 			instance.tick()
 			instance.draw()
 			updateInput();
+
+			// Draw debug.
+			if (_debug) {
+				var ctx = _ctx
+
+				// Safe margin
+				var margin = 0.05 * ctx.w
+				ctx.strokeStyle = "#d62246" + "99"
+				ctx.strokeRect(margin, margin, ctx.w - margin*2, ctx.h - margin*2)
+
+				// Rule of thirds
+				ctx.strokeStyle = "#d4f4dd" + "55"
+				ctx.beginPath()
+				ctx.moveTo(ctx.w * 0.33, 0)
+				ctx.lineTo(ctx.w * 0.33, ctx.h)
+				ctx.moveTo(ctx.w * 0.66, 0)
+				ctx.lineTo(ctx.w * 0.66, ctx.h)
+				ctx.moveTo(0, ctx.h * 0.33)
+				ctx.lineTo(ctx.w, ctx.h * 0.33)
+				ctx.moveTo(0, ctx.h * 0.66)
+				ctx.lineTo(ctx.w, ctx.h * 0.66)
+				ctx.stroke()
+				ctx.closePath()
+
+				// Centered cross
+				ctx.strokeStyle = "#17bebb" + "88"
+				ctx.beginPath()
+				ctx.moveTo(ctx.w/2, 0)
+				ctx.lineTo(ctx.w/2, ctx.h)
+				ctx.moveTo(0, ctx.h/2)
+				ctx.lineTo(ctx.w, ctx.h/2)
+				ctx.stroke()
+				ctx.closePath()
+			}
 
 			// Restart loop
 			window.requestAnimationFrame(loop);

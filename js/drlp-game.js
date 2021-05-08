@@ -474,15 +474,7 @@ return {
 		if (isDef(_gameState.nextPill)) {
 			drawPlayerPill(ctx, _gameState.nextPill, ctx.w * 0.7, ctx.h * 0.3)
 		}
-
-		// Draw debug.
-		ctx.strokeStyle = "cyan"
-		ctx.beginPath()
-		ctx.moveTo(ctx.w/2, 0)
-		ctx.lineTo(ctx.w/2, ctx.h)
-		ctx.stroke()
-		ctx.closePath()
-
+		
 		// Draw item
 		queueDraw()
 	},
