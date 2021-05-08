@@ -12,6 +12,7 @@ const GameState = () => {
 return {
 	board: PillBoard(),
 	playerPill: null,
+	nextPill: null,
 }
 }
 
@@ -44,9 +45,16 @@ const ItemEvent = Object.freeze({
 const SpawnPlayerPillItem = (gameState) => {
 return {
 	enter: () => {
-		gameState.playerPill = PlayerPill([RandomColor(), RandomColor()])
+		if (isUndef(gameState.nextPill)) {
+			gameState.nextPill = PlayerPill([RandomColor(), RandomColor()])
+		}
+
+		gameState.playerPill = gameState.nextPill
+		//gameState.playerPill = PlayerPill([RandomColor(), RandomColor()])
 		gameState.playerPill.x = BOARD_SPAWN_P.x
 		gameState.playerPill.y = BOARD_SPAWN_P.y
+
+		gameState.nextPill = PlayerPill([RandomColor(), RandomColor()])
 	},
 	tick: () => {
 		return { status: ItemStatus.complete, event: ItemEvent.spawnedPlayerPill }
@@ -435,6 +443,9 @@ return {
 		drawPillboard(ctx, board)
 		if (isDef(_gameState.playerPill)) {
 			drawPlayerPill(ctx, _gameState.playerPill, board.dX, board.dY)
+		}
+		if (isDef(_gameState.nextPill)) {
+			drawPlayerPill(ctx, _gameState.nextPill, ctx.w * 0.7, ctx.h * 0.3)
 		}
 
 		// Draw debug.
