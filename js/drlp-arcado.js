@@ -5,7 +5,7 @@ const Arcado = function() {
 console.log("ARCADO - INIT")
 
 var _paused = false
-var _debug = true
+var _debug = false
 
 // Get canvas and 2D context
 var _canvas = document.getElementById("arcado-canvas")
@@ -35,6 +35,8 @@ window.onresize = resetCanvas
 return {
 	run: (runnable) => {
 		let context = {}
+		// Debug
+		context.debug = _debug
 		// Timing
 		context.time = {}
 		context.time.currTime = 0
@@ -50,6 +52,9 @@ return {
 		function clearInput() {
 			context.input.pressed = [];
 			context.input.released = [];
+		}
+		document.getElementById("arcado-button-pause").onclick = (event) => {
+			_paused = !_paused
 		}
 		document.onkeydown = (event) => {
 			if (["Space", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].indexOf(event.code) > -1) {
@@ -134,6 +139,18 @@ return {
 				ctx.lineTo(ctx.w, ctx.h/2)
 				ctx.stroke()
 				ctx.closePath()
+			}
+
+			// Paused?
+			if (_paused) {
+				var ctx = _ctx
+				ctx.fillStyle = "#000000" + "88"
+				ctx.fillRect(0, 0, ctx.w, ctx.h)
+
+				ctx.fillStyle = "#FFFFFF" + "88"
+				ctx.font = "100px MONOSPACE"
+				ctx.textAlign = "center"
+				ctx.fillText("PAUSED", ctx.w/2, ctx.h/2)
 			}
 
 			// Restart loop

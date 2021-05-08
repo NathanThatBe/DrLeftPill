@@ -118,13 +118,14 @@ return {
 		var t = _animation.t / _animation.dur
 		var startX = ctx.w * 0.7
 		var startY = ctx.h * 0.3
-		var endX = gameState.board.dX + BOARD_SPAWN_P.x * 20
-		var endY = gameState.board.dY + BOARD_SPAWN_P.y * 20
+		var endX = gameState.board.dX + BOARD_SPAWN_P.x * 20  // !
+		var endY = gameState.board.dY + BOARD_SPAWN_P.y * 20  // !
+		var dir = lerp(0, -90, t)
 
 		var x = lerp(startX, endX, t)
 		var y = lerp(startY, endY, t)
 
-		drawPlayerPill(ctx, _flipPill, x, y, gameState.board.tileSize)
+		drawPlayerPill(ctx, _flipPill, x, y, gameState.board.tileSize, dir)
 	},
 }
 }
@@ -144,6 +145,7 @@ return {
 					var virus = Tile(TileType.virus, RandomColor())
 					virus.animation.scale = 0
 					virus.animation.spawnDelay = 0
+					virus.animation.offset = { x: randomRange(0, 1), y: randomRange(0, 1) }
 					_viruses.push(virus)
 					gameState.board.tiles[yy][xx] = virus
 				}	
@@ -322,9 +324,25 @@ var _delay = {t: 0, dur: 0.2}
 var _skip = false
 return {
 	enter: () => {
+		var board = gameState.board
+
 		// Find all combos
-		_tilesToRemove = findComboTiles(gameState.board)
-		if (_tilesToRemove.length === 0) _skip = true
+		_tilesToRemove = findComboTiles(board)
+		if (_tilesToRemove.length === 0) {
+			_skip = true
+			return
+		}
+
+		// Break up pills
+		_tilesToRemove.forEach(tile => {
+			var pillEnd = board.tiles[tile[1]][tile[0]]
+			pillEnd.connectionDir = null
+		})
+		var floatingPills = convertFloatingPills(board)
+		floatingPills.forEach(tile => {
+			var pillEnd = board.tiles[tile[1]][tile[0]]
+			pillEnd.connectionDir = null
+		})
 	},
 	tick: () => {
 		if (_skip) {
@@ -336,6 +354,13 @@ return {
 			return { status: ItemStatus.complete, event: ItemEvent.clearedCombos }
 		}
 
+		// Shake all tiles at the same time.
+		_tilesToRemove.forEach(tile => { 
+			gameState.board.tiles[tile[1]][tile[0]].animation.offset.x = randomRange(-5, 5)
+			gameState.board.tiles[tile[1]][tile[0]].y = randomRange(-5, 5)
+		})
+
+
 		// Scale 1 tile at a time
 		var tile = _tilesToRemove[0]
 		_delay.t += context.time.timeStep
@@ -343,7 +368,7 @@ return {
 		var t = lerp(1, 0, Math.min(1, _delay.t / _delay.dur))
 		var boardTile = gameState.board.tiles[tile[1]][tile[0]]
 		boardTile.animation.scale = t
-
+		
 		if (_delay.t >= _delay.dur) {
 			gameState.board.tiles[tile[1]][tile[0]] = Tile(TileType.none, TileColor.none)
 			_tilesToRemove.shift()
@@ -511,7 +536,7 @@ return {
 		var tileSize = (boardRect.y1 - boardRect.y0) / BOARD_H
 		ctx.strokeStyle = "#9b5de5"
 		ctx.lineWidth = 3
-		ctx.strokeRect(boardRect.x0, boardRect.y0, boardRect.x1 - boardRect.x0, boardRect.y1 - boardRect.y0)
+		//ctx.strokeRect(boardRect.x0, boardRect.y0, boardRect.x1 - boardRect.x0, boardRect.y1 - boardRect.y0)
 
 		// DRLP Home
 		var homeRect = _layout.doctorRect
@@ -536,10 +561,12 @@ return {
 		board.tileSize = tileSize
 		drawPillboard(ctx, board)
 		if (isDef(_gameState.playerPill)) {
-			drawPlayerPill(ctx, _gameState.playerPill, board.dX, board.dY, board.tileSize)
+			drawPlayerPillOnBoard(ctx, _gameState.playerPill, board)
 		}
 		if (isDef(_gameState.nextPill)) {
-			drawPlayerPill(ctx, _gameState.nextPill, homeRect.x0 + (homeRect.x1 - homeRect.x0) / 2, homeRect.y0 + (homeRect.y1 - homeRect.y0) / 2, board.tileSize)
+			var pX = homeRect.x0 + (homeRect.x1 - homeRect.x0) / 2
+			var pY = homeRect.y0 + (homeRect.y1 - homeRect.y0) / 2
+			drawPlayerPill(ctx, _gameState.nextPill, pX, pY, board.tileSize, 0)
 		}
 
 		// Draw item
