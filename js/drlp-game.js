@@ -529,11 +529,11 @@ return {
 		var board = _gameState.board
 		var dX = ctx.w * 0.25
 		var dY = ctx.h * 0.25
+		console.assert(isDef(dX))
 		board.dX = boardRect.x0 + (tileSize / 2)
 		board.dY = boardRect.y0 + (tileSize / 2)
 		board.rect = boardRect
 		board.tileSize = tileSize
-		console.assert(isDef(board))
 		drawPillboard(ctx, board)
 		if (isDef(_gameState.playerPill)) {
 			drawPlayerPill(ctx, _gameState.playerPill, board.dX, board.dY, board.tileSize)

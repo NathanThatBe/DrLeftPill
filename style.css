@@ -27,21 +27,9 @@ body {
 .tight-wrap {
     max-width: 600px;
     margin: 0 auto;
-
-    /*border: 2px solid green;*/
 }
 
 #arcado-container {
-	/*border: 2px solid red;*/
-
 	display: flex;
 	justify-content: center;
-}
-
-#header {
-	border: 2px solid yellow;
-}
-
-#main {
-	border: 2px solid cyan;
 }
