@@ -1,24 +1,36 @@
 "use strict"
 
-const MAX_W = 500
-const W = MAX_W
-const H = MAX_W * (144/160)
-
 const Arcado = function() {
+
+console.log("ARCADO - INIT")
+
 var _paused = false
 var _debug = true
 
-// Create canvas with 2D drawing context
-let _canvas = document.createElement("canvas")
-let _ctx = _canvas.getContext("2d")
-let ratio = window.devicePixelRatio || 1
-_canvas.width = W * ratio
-_canvas.height = H * ratio
-_ctx.scale(ratio, ratio)
-_canvas.style.width = W + "px"
-_canvas.style.height = H + "px"
-document.body.appendChild(_canvas)
-console.log("ARCADO - INIT")
+// Get canvas and 2D context
+var _canvas = document.getElementById("arcado-canvas")
+var _ctx = _canvas.getContext("2d")
+
+function resetCanvas() {
+	const min_w = 160*2
+	var containerDiv = document.getElementById("arcado-width")
+	var max_w = containerDiv.offsetWidth
+	var max_h = window.innerHeight
+	var w = Math.max(Math.min(max_w, max_h), min_w)
+	var h = Math.floor(w * (144/160))
+	var ratio = window.devicePixelRatio || 1
+
+	_canvas.width = w * ratio
+	_canvas.height = h * ratio
+	_ctx.scale(ratio, ratio)
+	_ctx.w = w
+	_ctx.h = h
+	_ctx.safeMargin = w * 0.05
+	_canvas.style.width = w + "px"
+	_canvas.style.height = h + "px"
+}
+resetCanvas()  // !: Do before running game.
+window.onresize = resetCanvas
 
 return {
 	run: (runnable) => {
@@ -29,16 +41,13 @@ return {
 		context.time.timeStep = 0
 		// Drawing
 		context.ctx = _ctx
-		context.ctx.w = W
-		context.ctx.h = H
-		context.ctx.safeMargin = W * 0.05
 		// Input
 		context.input = {
 			pressed: [],
 			released: [],
 			down: [],
 		}
-		function updateInput() {
+		function clearInput() {
 			context.input.pressed = [];
 			context.input.released = [];
 		}
@@ -70,28 +79,27 @@ return {
 		instance.enter()
 
 		function loop() {
-			if (_paused) {
-				window.requestAnimationFrame(loop)
-				return
+			if (!_paused) {
+				// Update context
+				let prev = currTime
+				currTime = (Date.now() * 0.001) - initRealTime
+				prevTime = prev
+				const timeStep = (currTime - prevTime)
+				if (timeStep > 1) {
+					window.requestAnimationFrame(loop)
+					return
+				}
+
+				context.time.timeStep = timeStep
+				context.time.currTime += timeStep
+				instance.tick()
 			}
 
-			// Update context
-			let prev = currTime
-			currTime = (Date.now() * 0.001) - initRealTime
-			prevTime = prev
-			const timeStep = (currTime - prevTime)
-			if (timeStep > 1) {
-				window.requestAnimationFrame(loop)
-				return
-			}
-
-			context.time.timeStep = timeStep
-			context.time.currTime += timeStep
-
-			// Update runnable instance
-			instance.tick()
 			instance.draw()
-			updateInput();
+
+			if (!_paused) {
+				clearInput()
+			}
 
 			// Draw debug.
 			if (_debug) {

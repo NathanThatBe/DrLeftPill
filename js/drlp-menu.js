@@ -91,6 +91,9 @@ return {
 	draw: () => {
 		var ctx = context.ctx
 
+		ctx.font = "24px MONOSPACE"
+		ctx.textAlign = "left"
+
 		ctx.fillStyle = "white"
 		var spacing = ctx.h / (_menuItems.length + 2)
 		var currY = 0 + spacing
