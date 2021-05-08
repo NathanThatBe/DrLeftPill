@@ -35,6 +35,8 @@ window.onresize = resetCanvas
 return {
 	run: (runnable) => {
 		let context = {}
+		// Debug
+		context.debug = _debug
 		// Timing
 		context.time = {}
 		context.time.currTime = 0

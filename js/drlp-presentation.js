@@ -126,17 +126,6 @@ function drawPillboard(ctx, board) {
 			}
 		}
 	}
-
-	// Draw debug line numbers
-	ctx.fillStyle = "white"
-	ctx.font = "20px MONOSPACE"
-	ctx.textAlign = "right"
-	for (var yy = 0; yy < board.h; yy++) {
-		ctx.fillText(yy, dX - size, dY + yy*size + 4)
-	}
-	for (var xx = 0; xx < board.w; xx++) {
-		ctx.fillText(xx, dX + xx*size + 2, dY - size)
-	}
 }
 
 function drawPlayerPill(ctx, playerPill, dX, dY, size) {
