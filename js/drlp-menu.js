@@ -3,7 +3,7 @@
 const DrLeftPillMenu = (context) => {
 
 // Debug
-var _skipToGame = true
+var _skipToGame = false
 
 var _queue = []
 var _item = null
@@ -49,6 +49,14 @@ return {
 		ctx.fillStyle = "white"
 		ctx.font = "20px Itim"
 		ctx.fillText("Press any key to continue", ctx.w/2, ctx.h * 0.62)
+
+		// Draw some pills
+		newDrawPill(ctx, 50, 100, 20, COLOR_PILL_RED)
+		newDrawPill(ctx, 100, 100, 20, COLOR_PILL_BLUE)
+		newDrawPill(ctx, 150, 100, 20, COLOR_PILL_YELLOW)
+
+		newDrawFullPill(ctx, 300, 100, context.time.currTime * 20, 20, 40, [COLOR_PILL_YELLOW, COLOR_PILL_RED])
+		newDrawFullPill(ctx, 500, 100, context.time.currTime * 20, 20, 40, [COLOR_PILL_RED, COLOR_PILL_BLUE])
 	}
 }
 }

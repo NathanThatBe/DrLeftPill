@@ -118,13 +118,14 @@ return {
 		var t = _animation.t / _animation.dur
 		var startX = ctx.w * 0.7
 		var startY = ctx.h * 0.3
-		var endX = gameState.board.dX + BOARD_SPAWN_P.x * 20
-		var endY = gameState.board.dY + BOARD_SPAWN_P.y * 20
+		var endX = gameState.board.dX + BOARD_SPAWN_P.x * 20  // !
+		var endY = gameState.board.dY + BOARD_SPAWN_P.y * 20  // !
+		var dir = lerp(0, -90, t)
 
 		var x = lerp(startX, endX, t)
 		var y = lerp(startY, endY, t)
 
-		drawPlayerPill(ctx, _flipPill, x, y, gameState.board.tileSize)
+		drawPlayerPill(ctx, _flipPill, x, y, gameState.board.tileSize, dir)
 	},
 }
 }
@@ -536,11 +537,28 @@ return {
 		board.tileSize = tileSize
 		drawPillboard(ctx, board)
 		if (isDef(_gameState.playerPill)) {
-			drawPlayerPill(ctx, _gameState.playerPill, board.dX, board.dY, board.tileSize)
+			drawPlayerPillOnBoard(ctx, _gameState.playerPill, board)
+			//drawPlayerPill(ctx, _gameState.playerPill, board.dX, board.dY, board.tileSize)
 		}
 		if (isDef(_gameState.nextPill)) {
-			drawPlayerPill(ctx, _gameState.nextPill, homeRect.x0 + (homeRect.x1 - homeRect.x0) / 2, homeRect.y0 + (homeRect.y1 - homeRect.y0) / 2, board.tileSize)
+			var pX = homeRect.x0 + (homeRect.x1 - homeRect.x0) / 2
+			var pY = homeRect.y0 + (homeRect.y1 - homeRect.y0) / 2
+			drawPlayerPill(ctx, _gameState.nextPill, pX, pY, board.tileSize, 0)
+			//drawPlayerPill(ctx, _gameState.nextPill, homeRect.x0 + (homeRect.x1 - homeRect.x0) / 2, homeRect.y0 + (homeRect.y1 - homeRect.y0) / 2, board.tileSize)
 		}
+
+		// temp
+		/*
+		if (isDef(_gameState.playerPill)) {
+			var pill = _gameState.playerPill
+			var pX = board.dX + (pill.x + getPillDirX(pill.dir)/2) * board.tileSize
+			var pY = board.dY + (pill.y + getPillDirY(pill.dir)/2) * board.tileSize
+			var dir = pill.dir === PillDir.right ? 0 : 180
+			var colors = !pill.isReversed ? [setFillColor(pill.colors[0]), setFillColor(pill.colors[1])] :  [setFillColor(pill.colors[1]), setFillColor(pill.colors[0])]
+			newDrawFullPill(ctx, pX, pY, dir, board.tileSize*0.4, board.tileSize/2, colors)
+		}
+		*/
+
 
 		// Draw item
 		queueDraw()
