@@ -1,17 +1,17 @@
 "use strict"
 
-const DARK_PURPLE = "#1D071F"
+const DARK_PURPLE = "#25082D"
 
 function setFillColor(color) {
 switch (color) {
 	case TileColor.none:
-		return "#505050FF"
+		return "#090603"
 	case TileColor.red:
-		return "#EB395AFF"
+		return "#ff3562"
 	case TileColor.blue:
-		return "#4384C9FF"
+		return "#5dc6d4"
 	case TileColor.yellow:
-		return "#EAB928FF"
+		return "#EDCA78"
 }
 }
 
@@ -45,16 +45,51 @@ function drawPillboard(ctx, board) {
 	var dY = board.dY
 
 	// Draw BG
+	var bgMargin = pillRadius * -0.50
+	ctx.fillStyle = "#CD80AE"
+	ctx.strokeStyle = "white"
+	ctx.fillRect(board.rect.x0 + bgMargin, board.rect.y0 + bgMargin, board.w * size - (bgMargin*2), board.h * size - (bgMargin*2))
+	ctx.strokeRect(board.rect.x0 + bgMargin, board.rect.y0 + bgMargin, board.w * size - (bgMargin*2), board.h * size - (bgMargin*2))
+
+	bgMargin = pillRadius * 0.25
+	var gradient = ctx.createLinearGradient(board.rect.x0, board.rect.y0, board.rect.x1, board.rect.y1)
+	gradient.addColorStop(0, "#b486ab")
+	gradient.addColorStop(1, "#82667f")
+	ctx.fillStyle = gradient
+	ctx.fillRect(board.rect.x0 + bgMargin, board.rect.y0 + bgMargin, board.w * size - (bgMargin*2), board.h * size - (bgMargin*2))
+
 	ctx.fillStyle = setFillColor(TileColor.none)
+	var bgSize = size
 	for (var yy = 0; yy < board.h; yy++) {
 		for (var xx = 0; xx < board.w; xx++) {
 			ctx.beginPath()
-			ctx.arc(dX + xx * size, dY + yy * size, size*0.55, 0, 2*Math.PI)
+			ctx.arc(dX + xx * bgSize, dY + yy * bgSize, bgSize*0.65, 0, 2*Math.PI)
 			ctx.fill()
 			ctx.closePath()
 		}
 	}
 
+	var offset = size/2
+	ctx.strokeStyle = "#eacbd2" + "20"
+	ctx.lineWidth = 1
+	for (var xx = 1; xx < board.w; xx++) {
+		var x = board.rect.x0 + xx * size
+		ctx.beginPath()
+		ctx.moveTo(x, board.rect.y0 + offset)
+		ctx.lineTo(x, board.rect.y1 - offset)
+		ctx.stroke()
+		ctx.closePath()
+	}
+	for (var yy = 1; yy < board.h; yy++) {
+		var y = board.rect.y0 + yy * size
+		ctx.beginPath()
+		ctx.moveTo(board.rect.x0 + offset, y)
+		ctx.lineTo(board.rect.x0 + size * board.w - offset, y)
+		ctx.stroke()
+		ctx.closePath()
+	}
+
+	// Draw tiles
 	for (var yy = 0; yy < board.h; yy++) {
 		for (var xx = 0; xx < board.w; xx++) {
 			var tile = board.tiles[yy][xx]
@@ -64,7 +99,7 @@ function drawPillboard(ctx, board) {
 				case TileType.none:
 					break
 				case TileType.virus:
-					const virusWidth = 14 * tile.animation.scale
+					const virusWidth = pillRadius * tile.animation.scale
 					ctx.fillRect(dX + xx * size - virusWidth/2, dY + yy * size - virusWidth/2, virusWidth, virusWidth)
 					ctx.fillStyle = "black"
 					ctx.fillRect(dX + xx * size - virusWidth/4, dY + yy * size - virusWidth/4, virusWidth / 2, virusWidth / 2)

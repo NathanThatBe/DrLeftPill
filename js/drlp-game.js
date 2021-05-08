@@ -511,7 +511,7 @@ return {
 		var tileSize = (boardRect.y1 - boardRect.y0) / BOARD_H
 		ctx.strokeStyle = "#9b5de5"
 		ctx.lineWidth = 3
-		ctx.strokeRect(boardRect.x0, boardRect.y0, boardRect.x1 - boardRect.x0, boardRect.y1 - boardRect.y0)
+		//ctx.strokeRect(boardRect.x0, boardRect.y0, boardRect.x1 - boardRect.x0, boardRect.y1 - boardRect.y0)
 
 		// DRLP Home
 		var homeRect = _layout.doctorRect

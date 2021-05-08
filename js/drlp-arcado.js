@@ -5,7 +5,7 @@ const Arcado = function() {
 console.log("ARCADO - INIT")
 
 var _paused = false
-var _debug = true
+var _debug = false
 
 // Get canvas and 2D context
 var _canvas = document.getElementById("arcado-canvas")
