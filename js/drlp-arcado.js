@@ -1,8 +1,10 @@
 "use strict"
 
-const MAX_W = 500
-const W = MAX_W
-const H = MAX_W * (144/160)
+let containerDiv = document.getElementById("arcado-container")
+console.log(containerDiv.offsetWidth)
+var MAX_W = containerDiv.offsetWidth
+var W = MAX_W
+var H = MAX_W * (144/160)
 
 const Arcado = function() {
 var _paused = false
@@ -17,7 +19,6 @@ _canvas.height = H * ratio
 _ctx.scale(ratio, ratio)
 _canvas.style.width = W + "px"
 _canvas.style.height = H + "px"
-let containerDiv = document.getElementById("arcado-container")
 containerDiv.appendChild(_canvas)
 console.log("ARCADO - INIT")
 

@@ -13,22 +13,26 @@ div{
 }
 
 body {
-	 background-color: #4d243d
+	 background-color: #4d243d;
+	 color: white;
+	 font-family: Arial, Helvetica, Verdana, sans-serif;
 }
 
-.wrap{
-    max-width: 1200px;
+.wrap {
+    max-width: 1024px;
     margin: 0 auto;
     padding: 1em;
 }
  
-#primary{
-    max-width: 650px;
+.tight-wrap {
+    max-width: 600px;
     margin: 0 auto;
+
+    /*border: 2px solid green;*/
 }
 
 #arcado-container {
-	border: 2px solid red;
+	/*border: 2px solid red;*/
 
 	display: flex;
 	justify-content: center;
