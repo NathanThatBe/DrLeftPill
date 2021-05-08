@@ -12,7 +12,6 @@ const GameState = () => {
 return {
 	board: PillBoard(),
 	playerPill: null,
-	paused: false
 }
 }
 
