@@ -1,11 +1,12 @@
+"use strict"
 
 const DrLeftPillGame = function(context) {
 
 // Internal State
 
-_gameState = null
-_queue = []
-_item = null
+var _gameState = null
+var _queue = []
+var _item = null
 
 const GameState = () => {
 return {
@@ -368,7 +369,6 @@ function switchItem(event) {
 // Queueing
 
 function queuePush(item) {
-	var ii = item(context, _gameState)
 	_queue.push(item(context, _gameState))
 }
 
