@@ -31,6 +31,7 @@ return {
 		context.ctx = _ctx
 		context.ctx.w = W
 		context.ctx.h = H
+		context.ctx.safeMargin = W * 0.05
 		// Input
 		context.input = {
 			pressed: [],
@@ -95,9 +96,10 @@ return {
 			// Draw debug.
 			if (_debug) {
 				var ctx = _ctx
+				ctx.lineWidth = 1
 
 				// Safe margin
-				var margin = 0.05 * ctx.w
+				var margin = ctx.safeMargin
 				ctx.strokeStyle = "#d62246" + "99"
 				ctx.strokeRect(margin, margin, ctx.w - margin*2, ctx.h - margin*2)
 

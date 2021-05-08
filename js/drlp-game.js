@@ -4,16 +4,59 @@ const DrLeftPillGame = function(context) {
 
 // Internal State
 
-var _gameState = null
-var _queue = []
-var _item = null
-
 const GameState = () => {
 return {
 	board: PillBoard(),
 	playerPill: null,
 	nextPill: null,
 }
+}
+
+var _gameState = null
+var _queue = []
+var _item = null
+var _layout = {}
+
+function updateLayout() {
+	function inset(rect, amount) {
+		rect.x0 += amount
+		rect.y0 += amount
+		rect.x1 -= amount
+		rect.y1 -= amount
+	}
+
+	var ctx = context.ctx
+	var padding = ctx.safeMargin * 0.5
+
+	// Nuveau board
+	var boardRect = {
+		x0: ctx.safeMargin,
+		y0: ctx.safeMargin,
+		x1: ctx.w * 0.5,
+		y1: ctx.h - ctx.safeMargin,
+	}
+	inset(boardRect, padding)
+	_layout.boardRect = boardRect
+
+	// DRLP Home
+	var homeRect = {
+		x0: ctx.w * 0.5,
+		y0: ctx.safeMargin,
+		x1: ctx.w - ctx.safeMargin,
+		y1: ctx.h * 0.5,
+	}
+	inset(homeRect, padding)
+	_layout.doctorRect = homeRect
+
+	// Stats
+	var statsRect = {
+		x0: ctx.w * 0.5,
+		y0: ctx.h * 0.5,
+		x1: ctx.w - ctx.safeMargin,
+		y1: ctx.h - ctx.safeMargin,
+	}
+	inset(statsRect, padding)
+	_layout.statsRect = statsRect
 }
 
 // Items
@@ -81,7 +124,7 @@ return {
 		var x = lerp(startX, endX, t)
 		var y = lerp(startY, endY, t)
 
-		drawPlayerPill(ctx, _flipPill, x, y)
+		drawPlayerPill(ctx, _flipPill, x, y, gameState.board.tileSize)
 	},
 }
 }
@@ -314,9 +357,10 @@ return {
 		var ctx = context.ctx
 		ctx.fillStyle = "clear"
 		ctx.strokeStyle = "white"
+		ctx.lineWidth = 2.5
 		_tilesToRemove.forEach(tile => {
 			ctx.beginPath()
-			ctx.arc(board.dX + tile[0] * TILE_SIZE, board.dY + tile[1] * TILE_SIZE, 12, 0, 2*Math.PI)
+			ctx.arc(board.dX + tile[0] * board.tileSize, board.dY + tile[1] * board.tileSize, 12, 0, 2*Math.PI)
 			ctx.stroke()
 			ctx.closePath()
 		})
@@ -459,22 +503,45 @@ return {
 		var ctx = context.ctx
 		ctx.fillStyle = DARK_PURPLE
 		ctx.fillRect(0, 0, ctx.w, ctx.h)
-		
+
+		updateLayout()  // !: Remove
+
+		// Nuveau board
+		var boardRect = _layout.boardRect
+		var tileSize = (boardRect.y1 - boardRect.y0) / BOARD_H
+		ctx.strokeStyle = "#9b5de5"
+		ctx.lineWidth = 3
+		ctx.strokeRect(boardRect.x0, boardRect.y0, boardRect.x1 - boardRect.x0, boardRect.y1 - boardRect.y0)
+
+		// DRLP Home
+		var homeRect = _layout.doctorRect
+		ctx.strokeStyle = "#2FA677"
+		ctx.lineWidth = 3
+		ctx.strokeRect(homeRect.x0, homeRect.y0, homeRect.x1 - homeRect.x0, homeRect.y1 - homeRect.y0)
+
+		// Stats
+		var statsRect = _layout.statsRect
+		ctx.strokeStyle = "#F0791E"
+		ctx.lineWidth = 3
+		ctx.strokeRect(statsRect.x0, statsRect.y0, statsRect.x1 - statsRect.x0, statsRect.y1 - statsRect.y0)
+
 		// Draw board.
 		var board = _gameState.board
 		var dX = ctx.w * 0.25
 		var dY = ctx.h * 0.25
-		board.dX = dX
-		board.dY = dY
+		board.dX = boardRect.x0 + (tileSize / 2)
+		board.dY = boardRect.y0 + (tileSize / 2)
+		board.rect = boardRect
+		board.tileSize = tileSize
 		console.assert(isDef(board))
 		drawPillboard(ctx, board)
 		if (isDef(_gameState.playerPill)) {
-			drawPlayerPill(ctx, _gameState.playerPill, board.dX, board.dY)
+			drawPlayerPill(ctx, _gameState.playerPill, board.dX, board.dY, board.tileSize)
 		}
 		if (isDef(_gameState.nextPill)) {
-			drawPlayerPill(ctx, _gameState.nextPill, ctx.w * 0.7, ctx.h * 0.3)
+			drawPlayerPill(ctx, _gameState.nextPill, homeRect.x0 + (homeRect.x1 - homeRect.x0) / 2, homeRect.y0 + (homeRect.y1 - homeRect.y0) / 2, board.tileSize)
 		}
-		
+
 		// Draw item
 		queueDraw()
 	},

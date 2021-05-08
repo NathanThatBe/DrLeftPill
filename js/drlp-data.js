@@ -94,6 +94,8 @@ var _tiles = []
 var board = {
 	w: BOARD_W,
 	h: BOARD_H,
+	tileSize: 0,
+	rect: null,
 	tiles: _tiles,
 	getTileType: (x, y) => { return _tiles[y][x].type },
 	isOutOfBounds: (x, y) => {
