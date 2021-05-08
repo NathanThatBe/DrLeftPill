@@ -43,7 +43,7 @@ const ItemEvent = Object.freeze({
 	"nextTurn":          10,
 })
 
-const SpawnPlayerPillItem = (context, gameState) => {
+const SpawnPlayerPillItem = (gameState) => {
 return {
 	enter: () => {
 		gameState.playerPill = PlayerPill([RandomColor(), RandomColor()])
@@ -59,7 +59,7 @@ return {
 }
 }
 
-const SpawnVirusItem = (context, gameState) => {
+const SpawnVirusItem = (gameState) => {
 var _elapsed = 0
 var _viruses = []
 return {
@@ -104,7 +104,7 @@ return {
 }
 }
 
-const DropPlayerPillItem = (context, gameState) => {
+const DropPlayerPillItem = (gameState) => {
 var _delayMultiplier = 1
 var _dropDelay = 0.5
 var _currTime = 0
@@ -201,7 +201,7 @@ return {
 }
 }
 
-const ApplyGravityItem = (context, gameState) => {
+const ApplyGravityItem = (gameState) => {
 var _delay = {t: 0.3, dur: 0.3}
 return {
 	enter: () => {
@@ -246,7 +246,7 @@ return {
 }
 }
 
-const CheckComboItem = (context, gameState) => {
+const CheckComboItem = (gameState) => {
 var _tilesToRemove = null
 var _delay = {t: 0, dur: 0.2}
 var _skip = false
@@ -297,7 +297,7 @@ return {
 }
 }
 
-const CheckEndGameItem = (context, gameState) => {
+const CheckEndGameItem = (gameState) => {
 return {
 	enter: () => {
 	},
@@ -369,7 +369,7 @@ function switchItem(event) {
 // Queueing
 
 function queuePush(item) {
-	_queue.push(item(context, _gameState))
+	_queue.push(item(_gameState))
 }
 
 function queuePop() {
