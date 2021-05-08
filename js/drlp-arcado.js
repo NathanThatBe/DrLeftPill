@@ -1,7 +1,8 @@
 "use strict"
 
-const W = 500
-const H = 500
+const MAX_W = 500
+const W = MAX_W
+const H = MAX_W * (144/160)
 
 const Arcado = function() {
 var _paused = false

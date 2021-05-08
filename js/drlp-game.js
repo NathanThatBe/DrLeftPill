@@ -431,8 +431,8 @@ return {
 		
 		// Draw board.
 		var board = _gameState.board
-		var dX = 250 - 20*4
-		var dY = 250 - 20*8
+		var dX = ctx.w * 0.25
+		var dY = ctx.h * 0.25
 		board.dX = dX
 		board.dY = dY
 		console.assert(isDef(board))
@@ -440,6 +440,14 @@ return {
 		if (isDef(_gameState.playerPill)) {
 			drawPlayerPill(ctx, _gameState.playerPill, board.dX, board.dY)
 		}
+
+		// Draw debug.
+		ctx.strokeStyle = "cyan"
+		ctx.beginPath()
+		ctx.moveTo(ctx.w/2, 0)
+		ctx.lineTo(ctx.w/2, ctx.h)
+		ctx.stroke()
+		ctx.closePath()
 
 		// Draw item
 		queueDraw()
