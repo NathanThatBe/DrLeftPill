@@ -323,9 +323,25 @@ var _delay = {t: 0, dur: 0.2}
 var _skip = false
 return {
 	enter: () => {
+		var board = gameState.board
+
 		// Find all combos
-		_tilesToRemove = findComboTiles(gameState.board)
-		if (_tilesToRemove.length === 0) _skip = true
+		_tilesToRemove = findComboTiles(board)
+		if (_tilesToRemove.length === 0) {
+			_skip = true
+			return
+		}
+
+		// Break up pills
+		_tilesToRemove.forEach(tile => {
+			var pillEnd = board.tiles[tile[1]][tile[0]]
+			pillEnd.connectionDir = null
+		})
+		var floatingPills = convertFloatingPills(board)
+		floatingPills.forEach(tile => {
+			var pillEnd = board.tiles[tile[1]][tile[0]]
+			pillEnd.connectionDir = null
+		})
 	},
 	tick: () => {
 		if (_skip) {
@@ -538,26 +554,12 @@ return {
 		drawPillboard(ctx, board)
 		if (isDef(_gameState.playerPill)) {
 			drawPlayerPillOnBoard(ctx, _gameState.playerPill, board)
-			//drawPlayerPill(ctx, _gameState.playerPill, board.dX, board.dY, board.tileSize)
 		}
 		if (isDef(_gameState.nextPill)) {
 			var pX = homeRect.x0 + (homeRect.x1 - homeRect.x0) / 2
 			var pY = homeRect.y0 + (homeRect.y1 - homeRect.y0) / 2
 			drawPlayerPill(ctx, _gameState.nextPill, pX, pY, board.tileSize, 0)
-			//drawPlayerPill(ctx, _gameState.nextPill, homeRect.x0 + (homeRect.x1 - homeRect.x0) / 2, homeRect.y0 + (homeRect.y1 - homeRect.y0) / 2, board.tileSize)
 		}
-
-		// temp
-		/*
-		if (isDef(_gameState.playerPill)) {
-			var pill = _gameState.playerPill
-			var pX = board.dX + (pill.x + getPillDirX(pill.dir)/2) * board.tileSize
-			var pY = board.dY + (pill.y + getPillDirY(pill.dir)/2) * board.tileSize
-			var dir = pill.dir === PillDir.right ? 0 : 180
-			var colors = !pill.isReversed ? [setFillColor(pill.colors[0]), setFillColor(pill.colors[1])] :  [setFillColor(pill.colors[1]), setFillColor(pill.colors[0])]
-			newDrawFullPill(ctx, pX, pY, dir, board.tileSize*0.4, board.tileSize/2, colors)
-		}
-		*/
 
 
 		// Draw item

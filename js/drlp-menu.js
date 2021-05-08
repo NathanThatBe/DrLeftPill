@@ -3,7 +3,7 @@
 const DrLeftPillMenu = (context) => {
 
 // Debug
-var _skipToGame = false
+var _skipToGame = true
 
 var _queue = []
 var _item = null
