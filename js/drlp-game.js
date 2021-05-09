@@ -264,6 +264,7 @@ return {
 			gameState.board.tiles[tile1.y][tile1.x] = tile1
 
 			gameState.playerPill = null
+
 			return { status: ItemStatus.complete, event: ItemEvent.droppedPlayerPill }
 		}
 
@@ -289,9 +290,9 @@ return {
 
 		// Break up pills
 		var board = gameState.board
-		var floatingPills = convertFloatingPills(board)
+		var floatingPills = findAllFloatingPills(board)
 		floatingPills.forEach(tile => {
-			var pillEnd = board.tiles[tile[1]][tile[0]]
+			var pillEnd = board.tiles[tile.y][tile.x]
 			pillEnd.connectionDir = null
 		})
 
@@ -338,9 +339,9 @@ return {
 			var pillEnd = board.tiles[tile[1]][tile[0]]
 			pillEnd.connectionDir = null
 		})
-		var floatingPills = convertFloatingPills(board)
+		var floatingPills = findAllFloatingPills(board)
 		floatingPills.forEach(tile => {
-			var pillEnd = board.tiles[tile[1]][tile[0]]
+			var pillEnd = board.tiles[tile.y][tile.x]
 			pillEnd.connectionDir = null
 		})
 	},

@@ -85,17 +85,17 @@ function newDrawFullPill(ctx, x, y, dir, r, spacing, c) {
 
 	// Cap outlines
 	ctx.strokeStyle = "white"
-	ctx.fillStyle = c[0]
+	ctx.fillStyle = c[1]
 	ctx.beginPath()
-	ctx.arc(x + Math.cos(dir)*spacing, y + Math.sin(dir)*spacing, r, 0, 2*Math.PI)
+	ctx.arc(x - Math.cos(dir)*spacing, y - Math.sin(dir)*spacing, r, 0, 2*Math.PI)
 	ctx.fill()
 	ctx.stroke()
 	ctx.closePath()
 
 	ctx.strokeStyle = "white"
-	ctx.fillStyle = c[1]
+	ctx.fillStyle = c[0]
 	ctx.beginPath()
-	ctx.arc(x - Math.cos(dir)*spacing, y - Math.sin(dir)*spacing, r, 0, 2*Math.PI)
+	ctx.arc(x + Math.cos(dir)*spacing, y + Math.sin(dir)*spacing, r, 0, 2*Math.PI)
 	ctx.fill()
 	ctx.stroke()
 	ctx.closePath()
@@ -122,6 +122,7 @@ function newDrawFullPill(ctx, x, y, dir, r, spacing, c) {
 	ctx.lineTo(x + Math.cos(dir) * spacing - Math.sin(dir) * r, y + Math.sin(dir) * spacing + Math.cos(dir) * r, 0, 2*Math.PI)
 	ctx.lineTo(x - Math.sin(dir) * r, y + Math.cos(dir) * r, 0, 2*Math.PI)
 	ctx.fill()
+	ctx.closePath()
 
 	ctx.fillStyle = c[1]
 	ctx.beginPath()
@@ -131,6 +132,7 @@ function newDrawFullPill(ctx, x, y, dir, r, spacing, c) {
 	ctx.lineTo(x - Math.cos(dir) * spacing - Math.sin(dir) * r, y - Math.sin(dir) * spacing + Math.cos(dir) * r, 0, 2*Math.PI)
 	ctx.lineTo(x - Math.sin(dir) * r, y + Math.cos(dir) * r, 0, 2*Math.PI)
 	ctx.fill()
+	ctx.closePath()
 
 	// Sparkle
 	ctx.fillStyle = "white"
@@ -152,6 +154,8 @@ function newDrawFullPill(ctx, x, y, dir, r, spacing, c) {
 	ctx.arc(x, y, 2, 0, 2*Math.PI)
 	ctx.fill()
 	ctx.closePath()
+
+	ctx.lineWidth = 1
 }
 
 function drawPillboard(ctx, board) {
@@ -212,12 +216,12 @@ function drawPillboard(ctx, board) {
 	for (var yy = 0; yy < board.h; yy++) {
 		for (var xx = 0; xx < board.w; xx++) {
 			var tile = board.tiles[yy][xx]
-
-			ctx.fillStyle = setFillColor(tile.color)			
+					
 			switch (tile.type) {
 				case TileType.none:
 					break
 				case TileType.virus:
+					ctx.fillStyle = setFillColor(tile.color)	
 					var offset = tile.animation.offset
 					const virusWidth = pillRadius * tile.animation.scale
 					ctx.fillRect(dX + xx * size - virusWidth/2 + offset.x, dY + yy * size - virusWidth/2 + offset.y, virusWidth, virusWidth)
@@ -225,11 +229,12 @@ function drawPillboard(ctx, board) {
 					ctx.fillRect(dX + xx * size - virusWidth/4, dY + yy * size - virusWidth/4, virusWidth / 2, virusWidth / 2)
 					break
 				case TileType.pill:
-				   	if (isUndef(tile.connectionDir)) {
-				   		newDrawPill(ctx, dX + xx * size + tile.animation.offset.x, dY + yy * size + tile.animation.offset.y, size*0.4, setFillColor(tile.color))
-				   	} else {
-				   		var otherTile = null
-				   		var pillDir = null
+					ctx.fillStyle = setFillColor(tile.color)
+					if (isUndef(tile.connectionDir)) {
+						newDrawPill(ctx, dX + xx * size + tile.animation.offset.x, dY + yy * size + tile.animation.offset.y, size*0.4, setFillColor(tile.color))
+					} else {
+						var otherTile = null
+						var pillDir = null
 				   		switch (tile.connectionDir) {
 				   			case ConnectionDir.down:
 				   			case ConnectionDir.left:
@@ -241,9 +246,11 @@ function drawPillboard(ctx, board) {
 				   			case ConnectionDir.up:
 				   				otherTile = board.tiles[yy - 1][xx]
 				   				pillDir = PillDir.up
+
 				   				break
 				   		}
-				   		console.assert(isDef(otherTile))
+
+		   				console.assert(isDef(otherTile))
 		   				var pill = PlayerPill([tile.color, otherTile.color])
 						var pX = dX + (xx + getPillDirX(pillDir)/2) * size
 						var pY = dY + (yy + getPillDirY(pillDir)/2) * size
