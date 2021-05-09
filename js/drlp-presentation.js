@@ -181,7 +181,7 @@ function drawPillboard(ctx, board) {
 	ctx.fillStyle = gradient
 	ctx.fillRect(board.rect.x0 + bgMargin, board.rect.y0 + bgMargin, board.w * size - (bgMargin*2), board.h * size - (bgMargin*2))
 
-	ctx.fillStyle = setFillColor(TileColor.none)
+	ctx.fillStyle = setFillColor(TileColor.none) + "11"
 	var bgSize = size
 	for (var yy = 0; yy < board.h; yy++) {
 		for (var xx = 0; xx < board.w; xx++) {
@@ -259,6 +259,17 @@ function drawPillboard(ctx, board) {
 						newDrawFullPill(ctx, pX, pY, dir, board.tileSize*0.4, board.tileSize/2, colors.reverse())
 				   	}
 					break
+			}
+		}
+	}
+
+	for (var yy = 0; yy < board.h; yy++) {
+		for (var xx = 0; xx < board.w; xx++) {
+			var tile = board.tiles[yy][xx]
+
+			if (tile.debug.moved) {
+				ctx.fillStyle = "green"
+				ctx.fillRect(dX + xx * size, dY + yy * size, 10, 10)
 			}
 		}
 	}

@@ -85,6 +85,10 @@ const ItemEvent = Object.freeze({
 	"nextTurn":          10,
 })
 
+function eventName(event) {
+	return Object.keys(ItemEvent).find(key => ItemEvent[key] === event)
+}
+
 const SpawnPlayerPillItem = (gameState) => {
 var _animation = { t: 0, dur: 0.2 }
 var _shouldAnimate = true
@@ -136,6 +140,7 @@ var _viruses = []
 return {
 	enter: () => {
 		console.assert(isDef(gameState.board))
+
 		// Generate random virus pattern
 		var maxHeight = 5
 		var spawnTolerance = 0.4
@@ -151,6 +156,34 @@ return {
 				}	
 			}
 		}
+
+		// Test Pattern
+		// function put(t, x, y) {
+		// 	gameState.board.tiles[y][x] = t
+		// }
+		// function pill(c, dir) {
+		// 	var tile = Tile(TileType.pill, c)
+		// 	tile.connectionDir = dir
+		// 	return tile
+		// }
+		// function virus(c) {
+		// 	return Tile(TileType.virus, c)
+		// }
+
+		// put(virus(TileColor.red), 0, 15)
+		
+		// put(pill(TileColor.yellow), 4, 15)
+		// put(pill(TileColor.yellow), 4, 14)
+
+		// put(pill(TileColor.red), 3, 15)
+
+		// put(pill(TileColor.blue), 2, 15)
+
+		// put(pill(TileColor.yellow, ConnectionDir.left), 4, 13)
+		// put(pill(TileColor.red, ConnectionDir.right), 3, 13)
+
+		// put(pill(TileColor.red, ConnectionDir.left), 3, 12)
+		// put(pill(TileColor.blue, ConnectionDir.right), 2, 12)
 	},
 	tick: () => {
 		_elapsed += context.time.timeStep
@@ -298,7 +331,6 @@ return {
 
 		// Apply gravity to columns of pills
 		var tilesToMove = findTilesThatCanFall(board)
-
 		if (tilesToMove.length === 0) {
 			return { status: ItemStatus.complete, event: ItemEvent.appliedGravity }
 		}
@@ -306,6 +338,7 @@ return {
 		// Move all tiles at together
 		tilesToMove.forEach(loc => {
 			var tile = board.tiles[loc[1]][loc[0]]
+			tile.debug.moved = true
 			var tileBelow = board.tiles[loc[1]+1][loc[0]]
 
 			// swap
@@ -360,7 +393,6 @@ return {
 			gameState.board.tiles[tile[1]][tile[0]].animation.offset.x = randomRange(-5, 5)
 			gameState.board.tiles[tile[1]][tile[0]].y = randomRange(-5, 5)
 		})
-
 
 		// Scale 1 tile at a time
 		var tile = _tilesToRemove[0]
@@ -428,6 +460,7 @@ return {
 }
 
 function switchItem(event) {
+	// console.log("switch -", eventName(event))
 	switch (event) {
 		case ItemEvent.resetGame:
 			queuePush(SpawnVirusItem)

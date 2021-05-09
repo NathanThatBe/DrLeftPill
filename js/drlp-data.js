@@ -64,6 +64,7 @@ return {
 	color: tileColor,
 	connectionDir: null,
 	animation: Animation(),
+	debug: {}
 }
 }
 
@@ -224,8 +225,9 @@ function findTilesThatCanFall(board) {
 		if (!isDuplicate(tile)) tiles.push(tile)
 	}
 
-	for (var xx = 0; xx < board.w; xx++) {
-		for (var yy = board.h - 1; yy >= 0; yy--) {
+
+	for (var yy = board.h - 1; yy >= 0; yy--) {
+		for (var xx = 0; xx < board.w; xx++) {
 			function tileBelowIsFree(x, y) {				
 				var tileBelow = board.tiles[y+1][x]
 				return tileBelow.type === TileType.none || isDuplicate([x, y+1])
