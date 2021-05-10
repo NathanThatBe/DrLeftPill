@@ -53,14 +53,11 @@ return {
 			context.input.pressed = [];
 			context.input.released = [];
 		}
-		document.getElementById("arcado-button-pause").onclick = (event) => {
-			_paused = !_paused
-		}
 		document.onkeydown = (event) => {
 			if (["Space", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].indexOf(event.code) > -1) {
 				event.preventDefault()
 			}
-			if (event.code === "Backquote") {
+			if (event.code === "Backquote" || event.key.toUpperCase() === "P") {
 				_paused = !_paused
 			}
 			if (context.input.down.indexOf(event.key) < 0) {
@@ -142,16 +139,16 @@ return {
 			}
 
 			// Paused?
-			// if (_paused) {
-			// 	var ctx = _ctx
-			// 	ctx.fillStyle = "#000000" + "88"
-			// 	ctx.fillRect(0, 0, ctx.w, ctx.h)
+			if (_paused) {
+				var ctx = _ctx
+				ctx.fillStyle = "#000000" + "88"
+				ctx.fillRect(0, 0, ctx.w, ctx.h)
 
-			// 	ctx.fillStyle = "#FFFFFF" + "88"
-			// 	ctx.font = "100px MONOSPACE"
-			// 	ctx.textAlign = "center"
-			// 	ctx.fillText("PAUSED", ctx.w/2, ctx.h/2)
-			// }
+				ctx.fillStyle = "#FFFFFF" + "88"
+				ctx.font = (ctx.w * 0.2) + "px Itim"
+				ctx.textAlign = "center"
+				ctx.fillText("PAUSED", ctx.w/2, ctx.h/2)
+			}
 
 			// Restart loop
 			window.requestAnimationFrame(loop);

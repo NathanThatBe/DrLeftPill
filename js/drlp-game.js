@@ -135,6 +135,24 @@ function eventName(event) {
 	return Object.keys(ItemEvent).find(key => ItemEvent[key] === event)
 }
 
+const StartItem = (gameState) => {
+return {
+	enter: () => {},
+	tick: () => {
+		if (context.input.pressed.length > 0) {
+			return { status: ItemStatus.complete, event: ItemEvent.resetGame }
+		}
+	},
+	draw: () => {
+		var ctx = context.ctx
+		ctx.fillStyle = "white"
+		ctx.font = (ctx.w / 30) + "px Itim"
+		ctx.textAlign = "center"
+		ctx.fillText("Press any key to play", ctx.w/2, ctx.h*0.5)
+	}
+}
+}
+
 const SpawnPlayerPillItem = (gameState) => {
 var _animation = { t: 0, dur: 0.2 }
 var _shouldAnimate = true
@@ -189,7 +207,7 @@ return {
 
 		// Generate random virus pattern
 		var maxHeight = 5
-		var spawnTolerance = 0.4
+		var spawnTolerance = 0.6
 		for (var yy = 16 - 1; yy >= 16 - 1 - maxHeight; yy--) {
 			for (var xx = 0; xx < 8; xx++) {
 				if (Math.random() > spawnTolerance) {
@@ -217,6 +235,8 @@ return {
 		// }
 
 		// put(virus(TileColor.red), 0, 15)
+		// put(virus(TileColor.red), 0, 14)
+		// put(virus(TileColor.red), 0, 13)
 		
 		// put(pill(TileColor.yellow), 4, 15)
 		// put(pill(TileColor.yellow), 4, 14)
@@ -479,6 +499,66 @@ return {
 }
 }
 
+const StageClearItem = (gameState) => {
+return {
+	enter: () => {
+
+	},
+	tick: () => {
+		var reset = false
+		context.input.pressed.forEach(key => {
+			switch (key.toUpperCase()) {
+				case "R":
+					reset = true
+			}
+		})
+		if (reset) {
+			return { status: ItemStatus.complete, event: ItemEvent.resetGame }	
+		}
+	},
+	draw: () => {
+		var ctx = context.ctx
+		ctx.fillStyle = "white"
+		ctx.font = (ctx.w / 25) + "px Itim"
+		ctx.textAlign = "center"
+		ctx.fillText("STAGE CLEAR!", ctx.w/2, ctx.h*0.5)
+
+		ctx.font = (ctx.w / 35) + "px Itim"
+		ctx.fillText("Press R to play again", ctx.w/2, ctx.h*0.55)
+	}
+}
+}
+
+const TopOutItem = (gameState) => {
+return {
+	enter: () => {
+
+	},
+	tick: () => {
+		var reset = false
+		context.input.pressed.forEach(key => {
+			switch (key.toUpperCase()) {
+				case "R":
+					reset = true
+			}
+		})
+		if (reset) {
+			return { status: ItemStatus.complete, event: ItemEvent.resetGame }	
+		}
+	},
+	draw: () => {
+		var ctx = context.ctx
+		ctx.fillStyle = "white"
+		ctx.font = (ctx.w / 25) + "px Itim"
+		ctx.textAlign = "center"
+		ctx.fillText("TOP OUT!", ctx.w/2, ctx.h*0.5)
+
+		ctx.font = (ctx.w / 35) + "px Itim"
+		ctx.fillText("Press R to play again", ctx.w/2, ctx.h*0.55)
+	}
+}
+}
+
 const CheckEndGameItem = (gameState) => {
 return {
 	enter: () => {
@@ -515,7 +595,12 @@ return {
 function switchItem(event) {
 	// console.log("switch -", eventName(event))
 	switch (event) {
+		case ItemEvent.startGame:
+			_gameState = GameState()
+			queuePush(StartItem)
+			break
 		case ItemEvent.resetGame:
+			_gameState = GameState()
 			queuePush(SpawnVirusItem)
 			break
 		case ItemEvent.spawnedViruses:
@@ -538,10 +623,10 @@ function switchItem(event) {
 			queuePush(CheckEndGameItem)
 			break
 		case ItemEvent.stageClear:
-			console.log("stage clear")
+			queuePush(StageClearItem)
 			break
 		case ItemEvent.topOut:
-			console.log("top out")
+			queuePush(TopOutItem)
 			break
 		case ItemEvent.nextTurn:
 			queuePush(SpawnPlayerPillItem)
@@ -580,8 +665,7 @@ function queueDraw() {
 return {
 	enter: () => {
 		console.log("DrLeftPillGame - ENTER")
-		_gameState = GameState()
-		switchItem(ItemEvent.resetGame)
+		switchItem(ItemEvent.startGame)
 	},
 	tick: () => {
 		if (!queueHasItem()) {
