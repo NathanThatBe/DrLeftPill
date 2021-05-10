@@ -511,6 +511,36 @@ return {
 }
 }
 
+const TopOutItem = (gameState) => {
+return {
+	enter: () => {
+
+	},
+	tick: () => {
+		var reset = false
+		context.input.pressed.forEach(key => {
+			switch (key.toUpperCase()) {
+				case "R":
+					reset = true
+			}
+		})
+		if (reset) {
+			return { status: ItemStatus.complete, event: ItemEvent.resetGame }	
+		}
+	},
+	draw: () => {
+		var ctx = context.ctx
+		ctx.fillStyle = "white"
+		ctx.font = (ctx.w / 25) + "px Itim"
+		ctx.textAlign = "center"
+		ctx.fillText("TOP OUT!", ctx.w/2, ctx.h*0.5)
+
+		ctx.font = (ctx.w / 35) + "px Itim"
+		ctx.fillText("Press R to play again", ctx.w/2, ctx.h*0.55)
+	}
+}
+}
+
 const CheckEndGameItem = (gameState) => {
 return {
 	enter: () => {
@@ -575,7 +605,7 @@ function switchItem(event) {
 			queuePush(StageClearItem)
 			break
 		case ItemEvent.topOut:
-			console.log("top out")
+			queuePush(TopOutItem)
 			break
 		case ItemEvent.nextTurn:
 			queuePush(SpawnPlayerPillItem)
