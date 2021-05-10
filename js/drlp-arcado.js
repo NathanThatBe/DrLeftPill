@@ -53,9 +53,6 @@ return {
 			context.input.pressed = [];
 			context.input.released = [];
 		}
-		document.getElementById("arcado-button-pause").onclick = (event) => {
-			_paused = !_paused
-		}
 		document.onkeydown = (event) => {
 			if (["Space", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].indexOf(event.code) > -1) {
 				event.preventDefault()
