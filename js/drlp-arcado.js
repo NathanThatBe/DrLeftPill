@@ -142,16 +142,16 @@ return {
 			}
 
 			// Paused?
-			// if (_paused) {
-			// 	var ctx = _ctx
-			// 	ctx.fillStyle = "#000000" + "88"
-			// 	ctx.fillRect(0, 0, ctx.w, ctx.h)
+			if (_paused) {
+				var ctx = _ctx
+				ctx.fillStyle = "#000000" + "88"
+				ctx.fillRect(0, 0, ctx.w, ctx.h)
 
-			// 	ctx.fillStyle = "#FFFFFF" + "88"
-			// 	ctx.font = "100px MONOSPACE"
-			// 	ctx.textAlign = "center"
-			// 	ctx.fillText("PAUSED", ctx.w/2, ctx.h/2)
-			// }
+				ctx.fillStyle = "#FFFFFF" + "88"
+				ctx.font = "100px MONOSPACE"
+				ctx.textAlign = "center"
+				ctx.fillText("PAUSED", ctx.w/2, ctx.h/2)
+			}
 
 			// Restart loop
 			window.requestAnimationFrame(loop);
