@@ -2,6 +2,51 @@
 
 const DrLeftPillGame = function(context) {
 
+// Audio
+window.onload = initAudio
+
+var audioContext
+var sfxBufferTick
+var sfxBufferDrop
+var sfxBufferCombo1
+
+function initAudio() {
+	window.AudioContext = window.AudioContext || window.webkitAudioContext;
+
+	audioContext = new AudioContext()
+	var bufferLoader = new BufferLoader(
+		audioContext,
+		['sfx/tick.mp3', "sfx/drop.mp3", "sfx/combo1.mp3"],
+		didFinishBufferLoading
+	)
+	bufferLoader.load()
+}
+
+function didFinishBufferLoading(bufferList) {
+	sfxBufferTick = bufferList[0]
+	sfxBufferDrop = bufferList[1]
+	sfxBufferCombo1 = bufferList[2]
+}
+
+function playSfx(buffer) {
+	var sfx = audioContext.createBufferSource()
+	sfx.buffer = buffer
+	sfx.connect(audioContext.destination)
+	sfx.start(0)
+}
+
+function playSfxTick() {
+	playSfx(sfxBufferTick)
+}
+
+function playSfxDrop() {
+	playSfx(sfxBufferDrop)
+}
+
+function playCombo1() {
+	playSfx(sfxBufferCombo1)
+}
+
 // Internal State
 
 const GameState = () => {
@@ -261,6 +306,8 @@ return {
 				playerPill.dir = newDir
 				playerPill.isReversed = newReverse
 			}
+
+			playSfxTick()
 		}
 
 		// DOWN
@@ -297,6 +344,8 @@ return {
 			gameState.board.tiles[tile1.y][tile1.x] = tile1
 
 			gameState.playerPill = null
+
+			playSfxDrop()
 
 			return { status: ItemStatus.complete, event: ItemEvent.droppedPlayerPill }
 		}
@@ -377,6 +426,8 @@ return {
 			var pillEnd = board.tiles[tile.y][tile.x]
 			pillEnd.connectionDir = null
 		})
+
+		playCombo1()
 	},
 	tick: () => {
 		if (_skip) {
@@ -406,6 +457,8 @@ return {
 			gameState.board.tiles[tile[1]][tile[0]] = Tile(TileType.none, TileColor.none)
 			_tilesToRemove.shift()
 			_delay.t = 0
+
+			playCombo1()
 		}
 
 		return { status: ItemStatus.waiting }
