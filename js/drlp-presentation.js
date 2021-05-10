@@ -1,6 +1,6 @@
 "use strict"
 
-const DARK_PURPLE = "#1B1019" //"#3F263A"
+const DARK_PURPLE = "#710C3B" //"#3F263A"
 const COLOR_PILL_RED = "#F23C39"
 const COLOR_PILL_BLUE = "#00DAF6"
 const COLOR_PILL_YELLOW = "#FBC736"

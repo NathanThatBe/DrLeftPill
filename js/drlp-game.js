@@ -76,9 +76,9 @@ function updateLayout() {
 
 	// Nuveau board
 	var boardRect = {
-		x0: ctx.safeMargin,
+		x0: ctx.safeMargin + ctx.w * 0.24,
 		y0: ctx.safeMargin,
-		x1: ctx.w * 0.5,
+		x1: ctx.w * 1,
 		y1: ctx.h - ctx.safeMargin,
 	}
 	inset(boardRect, padding)
@@ -175,7 +175,7 @@ return {
 		var x = lerp(startX, endX, t)
 		var y = lerp(startY, endY, t)
 
-		drawPlayerPill(ctx, _flipPill, x, y, gameState.board.tileSize, dir)
+		//drawPlayerPill(ctx, _flipPill, x, y, gameState.board.tileSize, dir)
 	},
 }
 }
@@ -629,19 +629,30 @@ return {
 		var homeRect = _layout.doctorRect
 		ctx.strokeStyle = "#2FA677"
 		ctx.lineWidth = 3
-		ctx.strokeRect(homeRect.x0, homeRect.y0, homeRect.x1 - homeRect.x0, homeRect.y1 - homeRect.y0)
+		//ctx.strokeRect(homeRect.x0, homeRect.y0, homeRect.x1 - homeRect.x0, homeRect.y1 - homeRect.y0)
 
 		// Stats
 		var statsRect = _layout.statsRect
 		ctx.strokeStyle = "#F0791E"
 		ctx.lineWidth = 3
-		ctx.strokeRect(statsRect.x0, statsRect.y0, statsRect.x1 - statsRect.x0, statsRect.y1 - statsRect.y0)
+		//ctx.strokeRect(statsRect.x0, statsRect.y0, statsRect.x1 - statsRect.x0, statsRect.y1 - statsRect.y0)
+
+		// Draw BG pills.
+		var L = 20
+		var s = ctx.w / 8
+		var startDir = context.time.currTime * 2
+		var colors = [TileColor.red, TileColor.blue, TileColor.yellow]
+		var colors1 = [TileColor.blue, TileColor.yellow, TileColor.red]
+		var ii = 0
+		for (var yy = 0; yy < L; yy++) {
+			for (var xx = 0; xx < L; xx++) {
+				ii = (ii + 1) % colors.length
+				drawPlayerPill(ctx, PlayerPill([colors[ii], colors1[ii]]), xx * s, yy * s, s/5, startDir + xx * 45 + yy * 45)
+			}
+		}
 
 		// Draw board.
 		var board = _gameState.board
-		var dX = ctx.w * 0.25
-		var dY = ctx.h * 0.25
-		console.assert(isDef(dX))
 		board.dX = boardRect.x0 + (tileSize / 2)
 		board.dY = boardRect.y0 + (tileSize / 2)
 		board.rect = boardRect
@@ -650,11 +661,11 @@ return {
 		if (isDef(_gameState.playerPill)) {
 			drawPlayerPillOnBoard(ctx, _gameState.playerPill, board)
 		}
-		if (isDef(_gameState.nextPill)) {
-			var pX = homeRect.x0 + (homeRect.x1 - homeRect.x0) / 2
-			var pY = homeRect.y0 + (homeRect.y1 - homeRect.y0) / 2
-			drawPlayerPill(ctx, _gameState.nextPill, pX, pY, board.tileSize, 0)
-		}
+		// if (isDef(_gameState.nextPill)) {
+		// 	var pX = homeRect.x0 + (homeRect.x1 - homeRect.x0) / 2
+		// 	var pY = homeRect.y0 + (homeRect.y1 - homeRect.y0) / 2
+		// 	drawPlayerPill(ctx, _gameState.nextPill, pX, pY, board.tileSize, 0)
+		// }
 
 		// Draw item
 		queueDraw()
