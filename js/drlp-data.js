@@ -64,7 +64,6 @@ return {
 	color: tileColor,
 	connectionDir: null,
 	animation: Animation(),
-	debug: {}
 }
 }
 

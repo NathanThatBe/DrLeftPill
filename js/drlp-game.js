@@ -388,7 +388,6 @@ return {
 		// Move all tiles at together
 		tilesToMove.forEach(loc => {
 			var tile = board.tiles[loc[1]][loc[0]]
-			tile.debug.moved = true
 			var tileBelow = board.tiles[loc[1]+1][loc[0]]
 
 			// swap

@@ -1,9 +1,9 @@
 "use strict"
 
-const DARK_PURPLE = "#25082D"
-const COLOR_PILL_RED = "#ff3562"
-const COLOR_PILL_BLUE = "#5dc6d4"
-const COLOR_PILL_YELLOW = "#EDCA78"
+const DARK_PURPLE = "#1B1019" //"#3F263A"
+const COLOR_PILL_RED = "#F23C39"
+const COLOR_PILL_BLUE = "#00DAF6"
+const COLOR_PILL_YELLOW = "#FBC736"
 
 function setFillColor(color) {
 switch (color) {
@@ -29,11 +29,11 @@ function RandomColor() {
 	}
 }
 
-function newDrawPill(ctx, x, y, r, c) {
+function newDrawPill(ctx, x, y, r, c, bc) {
 	// Base albedo
 	ctx.fillStyle = c
-	ctx.strokeStyle = "white"
-	ctx.lineWidth = r * 0.6
+	ctx.strokeStyle = bc
+	ctx.lineWidth = r * 0.3
 	ctx.beginPath()
 	ctx.arc(x, y, r, 0, 2*Math.PI)
 	ctx.stroke()
@@ -41,7 +41,7 @@ function newDrawPill(ctx, x, y, r, c) {
 	ctx.closePath()
 
 	// Highlight
-	ctx.fillStyle = "white"
+	ctx.fillStyle = bc
 	ctx.beginPath()
 	ctx.arc(x - r*0.3, y - r*0.3, r*0.3, 0, 2*Math.PI)
 	ctx.fill()
@@ -59,7 +59,7 @@ function newDrawFullPill(ctx, x, y, dir, r, spacing, c) {
 	// Bar outline
 	ctx.strokeStyle = "white"
 	ctx.fillStyle = "white"
-	var extru = r * 0.6
+	var extru = r * 0.3
 	ctx.lineWidth = extru
 	r = r + extru/2
 	ctx.beginPath()
@@ -165,23 +165,23 @@ function drawPillboard(ctx, board) {
 	ctx.fillRect(board.rect.x0 + bgMargin, board.rect.y0 + bgMargin, board.w * size - (bgMargin*2), board.h * size - (bgMargin*2))
 	ctx.strokeRect(board.rect.x0 + bgMargin, board.rect.y0 + bgMargin, board.w * size - (bgMargin*2), board.h * size - (bgMargin*2))
 
-	bgMargin = pillRadius * 0.25
+	bgMargin = pillRadius * -0.1
 	var gradient = ctx.createLinearGradient(board.rect.x0, board.rect.y0, board.rect.x1, board.rect.y1)
 	gradient.addColorStop(0, "#b486ab")
 	gradient.addColorStop(1, "#82667f")
-	ctx.fillStyle = gradient
+	ctx.fillStyle = "black" //gradient
 	ctx.fillRect(board.rect.x0 + bgMargin, board.rect.y0 + bgMargin, board.w * size - (bgMargin*2), board.h * size - (bgMargin*2))
 
-	ctx.fillStyle = setFillColor(TileColor.none) + "11"
-	var bgSize = size
-	for (var yy = 0; yy < board.h; yy++) {
-		for (var xx = 0; xx < board.w; xx++) {
-			ctx.beginPath()
-			ctx.arc(dX + xx * bgSize, dY + yy * bgSize, bgSize*0.65, 0, 2*Math.PI)
-			ctx.fill()
-			ctx.closePath()
-		}
-	}
+	// ctx.fillStyle = setFillColor(TileColor.none) + "11"
+	// var bgSize = size
+	// for (var yy = 0; yy < board.h; yy++) {
+	// 	for (var xx = 0; xx < board.w; xx++) {
+	// 		ctx.beginPath()
+	// 		ctx.arc(dX + xx * bgSize, dY + yy * bgSize, bgSize*0.65, 0, 2*Math.PI)
+	// 		ctx.fill()
+	// 		ctx.closePath()
+	// 	}
+	// }
 
 	var offset = size/2
 	ctx.strokeStyle = "#eacbd2" + "20"
@@ -212,17 +212,13 @@ function drawPillboard(ctx, board) {
 				case TileType.none:
 					break
 				case TileType.virus:
-					ctx.fillStyle = setFillColor(tile.color)	
-					var offset = tile.animation.offset
-					const virusWidth = pillRadius * tile.animation.scale
-					ctx.fillRect(dX + xx * size - virusWidth/2 + offset.x, dY + yy * size - virusWidth/2 + offset.y, virusWidth, virusWidth)
-					ctx.fillStyle = "black"
-					ctx.fillRect(dX + xx * size - virusWidth/4, dY + yy * size - virusWidth/4, virusWidth / 2, virusWidth / 2)
+					ctx.fillStyle = setFillColor(tile.color)
+					newDrawPill(ctx, dX + xx * size + tile.animation.offset.x, dY + yy * size + tile.animation.offset.y, size *0.3, setFillColor(tile.color), "black")
 					break
 				case TileType.pill:
 					ctx.fillStyle = setFillColor(tile.color)
 					if (isUndef(tile.connectionDir)) {
-						newDrawPill(ctx, dX + xx * size + tile.animation.offset.x, dY + yy * size + tile.animation.offset.y, size*0.3, setFillColor(tile.color))
+						newDrawPill(ctx, dX + xx * size + tile.animation.offset.x, dY + yy * size + tile.animation.offset.y, size*0.35, setFillColor(tile.color), "white")
 					} else {
 						var otherTile = null
 						var pillDir = null
@@ -237,7 +233,6 @@ function drawPillboard(ctx, board) {
 				   			case ConnectionDir.up:
 				   				otherTile = board.tiles[yy - 1][xx]
 				   				pillDir = PillDir.up
-
 				   				break
 				   		}
 
@@ -247,20 +242,9 @@ function drawPillboard(ctx, board) {
 						var pY = dY + (yy + getPillDirY(pillDir)/2) * size
 						var dir = pillDir === PillDir.right ? 0 : 180
 						var colors = [setFillColor(tile.color), setFillColor(otherTile.color)]
-						newDrawFullPill(ctx, pX, pY, dir, board.tileSize*0.3, board.tileSize/2, colors.reverse())
+						newDrawFullPill(ctx, pX, pY, dir, board.tileSize*0.35, board.tileSize/2, colors.reverse())
 				   	}
 					break
-			}
-		}
-	}
-
-	for (var yy = 0; yy < board.h; yy++) {
-		for (var xx = 0; xx < board.w; xx++) {
-			var tile = board.tiles[yy][xx]
-
-			if (tile.debug.moved) {
-				ctx.fillStyle = "green"
-				ctx.fillRect(dX + xx * size, dY + yy * size, 10, 10)
 			}
 		}
 	}
@@ -274,5 +258,5 @@ function drawPlayerPillOnBoard(ctx, pill, board) {
 
 function drawPlayerPill(ctx, pill, pX, pY, size, dir) {
 	var colors = !pill.isReversed ? [setFillColor(pill.colors[0]), setFillColor(pill.colors[1])] :  [setFillColor(pill.colors[1]), setFillColor(pill.colors[0])]
-	newDrawFullPill(ctx, pX, pY, dir, size*0.3, size/2, colors)
+	newDrawFullPill(ctx, pX, pY, dir, size*0.35, size/2, colors)
 }
