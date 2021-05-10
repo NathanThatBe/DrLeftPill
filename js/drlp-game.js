@@ -2,6 +2,52 @@
 
 const DrLeftPillGame = function(context) {
 
+// Audio
+initAudio()
+
+var audioContext
+var sfxBufferTick
+var sfxBufferDrop
+var sfxBufferCombo1
+
+function initAudio() {
+	console.log("INIT AUDIO")
+	window.AudioContext = window.AudioContext || window.webkitAudioContext;
+
+	audioContext = new AudioContext()
+	var bufferLoader = new BufferLoader(
+		audioContext,
+		['sfx/tick.mp3', "sfx/drop.mp3", "sfx/combo1.mp3"],
+		didFinishBufferLoading
+	)
+	bufferLoader.load()
+}
+
+function didFinishBufferLoading(bufferList) {
+	sfxBufferTick = bufferList[0]
+	sfxBufferDrop = bufferList[1]
+	sfxBufferCombo1 = bufferList[2]
+}
+
+function playSfx(buffer) {
+	var sfx = audioContext.createBufferSource()
+	sfx.buffer = buffer
+	sfx.connect(audioContext.destination)
+	sfx.start(0)
+}
+
+function playSfxTick() {
+	playSfx(sfxBufferTick)
+}
+
+function playSfxDrop() {
+	playSfx(sfxBufferDrop)
+}
+
+function playCombo1() {
+	playSfx(sfxBufferCombo1)
+}
+
 // Internal State
 
 const GameState = () => {
@@ -30,9 +76,9 @@ function updateLayout() {
 
 	// Nuveau board
 	var boardRect = {
-		x0: ctx.safeMargin,
+		x0: ctx.safeMargin + ctx.w * 0.24,
 		y0: ctx.safeMargin,
-		x1: ctx.w * 0.5,
+		x1: ctx.w * 1,
 		y1: ctx.h - ctx.safeMargin,
 	}
 	inset(boardRect, padding)
@@ -85,6 +131,10 @@ const ItemEvent = Object.freeze({
 	"nextTurn":          10,
 })
 
+function eventName(event) {
+	return Object.keys(ItemEvent).find(key => ItemEvent[key] === event)
+}
+
 const SpawnPlayerPillItem = (gameState) => {
 var _animation = { t: 0, dur: 0.2 }
 var _shouldAnimate = true
@@ -125,7 +175,7 @@ return {
 		var x = lerp(startX, endX, t)
 		var y = lerp(startY, endY, t)
 
-		drawPlayerPill(ctx, _flipPill, x, y, gameState.board.tileSize, dir)
+		//drawPlayerPill(ctx, _flipPill, x, y, gameState.board.tileSize, dir)
 	},
 }
 }
@@ -136,6 +186,7 @@ var _viruses = []
 return {
 	enter: () => {
 		console.assert(isDef(gameState.board))
+
 		// Generate random virus pattern
 		var maxHeight = 5
 		var spawnTolerance = 0.4
@@ -151,6 +202,34 @@ return {
 				}	
 			}
 		}
+
+		// Test Pattern
+		// function put(t, x, y) {
+		// 	gameState.board.tiles[y][x] = t
+		// }
+		// function pill(c, dir) {
+		// 	var tile = Tile(TileType.pill, c)
+		// 	tile.connectionDir = dir
+		// 	return tile
+		// }
+		// function virus(c) {
+		// 	return Tile(TileType.virus, c)
+		// }
+
+		// put(virus(TileColor.red), 0, 15)
+		
+		// put(pill(TileColor.yellow), 4, 15)
+		// put(pill(TileColor.yellow), 4, 14)
+
+		// put(pill(TileColor.red), 3, 15)
+
+		// put(pill(TileColor.blue), 2, 15)
+
+		// put(pill(TileColor.yellow, ConnectionDir.left), 4, 13)
+		// put(pill(TileColor.red, ConnectionDir.right), 3, 13)
+
+		// put(pill(TileColor.red, ConnectionDir.left), 3, 12)
+		// put(pill(TileColor.blue, ConnectionDir.right), 2, 12)
 	},
 	tick: () => {
 		_elapsed += context.time.timeStep
@@ -228,6 +307,8 @@ return {
 				playerPill.dir = newDir
 				playerPill.isReversed = newReverse
 			}
+
+			playSfxTick()
 		}
 
 		// DOWN
@@ -264,6 +345,9 @@ return {
 			gameState.board.tiles[tile1.y][tile1.x] = tile1
 
 			gameState.playerPill = null
+
+			playSfxDrop()
+
 			return { status: ItemStatus.complete, event: ItemEvent.droppedPlayerPill }
 		}
 
@@ -289,15 +373,14 @@ return {
 
 		// Break up pills
 		var board = gameState.board
-		var floatingPills = convertFloatingPills(board)
+		var floatingPills = findAllFloatingPills(board)
 		floatingPills.forEach(tile => {
-			var pillEnd = board.tiles[tile[1]][tile[0]]
+			var pillEnd = board.tiles[tile.y][tile.x]
 			pillEnd.connectionDir = null
 		})
 
 		// Apply gravity to columns of pills
 		var tilesToMove = findTilesThatCanFall(board)
-
 		if (tilesToMove.length === 0) {
 			return { status: ItemStatus.complete, event: ItemEvent.appliedGravity }
 		}
@@ -338,11 +421,13 @@ return {
 			var pillEnd = board.tiles[tile[1]][tile[0]]
 			pillEnd.connectionDir = null
 		})
-		var floatingPills = convertFloatingPills(board)
+		var floatingPills = findAllFloatingPills(board)
 		floatingPills.forEach(tile => {
-			var pillEnd = board.tiles[tile[1]][tile[0]]
+			var pillEnd = board.tiles[tile.y][tile.x]
 			pillEnd.connectionDir = null
 		})
+
+		playCombo1()
 	},
 	tick: () => {
 		if (_skip) {
@@ -360,7 +445,6 @@ return {
 			gameState.board.tiles[tile[1]][tile[0]].y = randomRange(-5, 5)
 		})
 
-
 		// Scale 1 tile at a time
 		var tile = _tilesToRemove[0]
 		_delay.t += context.time.timeStep
@@ -373,6 +457,8 @@ return {
 			gameState.board.tiles[tile[1]][tile[0]] = Tile(TileType.none, TileColor.none)
 			_tilesToRemove.shift()
 			_delay.t = 0
+
+			playCombo1()
 		}
 
 		return { status: ItemStatus.waiting }
@@ -427,6 +513,7 @@ return {
 }
 
 function switchItem(event) {
+	// console.log("switch -", eventName(event))
 	switch (event) {
 		case ItemEvent.resetGame:
 			queuePush(SpawnVirusItem)
@@ -542,19 +629,30 @@ return {
 		var homeRect = _layout.doctorRect
 		ctx.strokeStyle = "#2FA677"
 		ctx.lineWidth = 3
-		ctx.strokeRect(homeRect.x0, homeRect.y0, homeRect.x1 - homeRect.x0, homeRect.y1 - homeRect.y0)
+		//ctx.strokeRect(homeRect.x0, homeRect.y0, homeRect.x1 - homeRect.x0, homeRect.y1 - homeRect.y0)
 
 		// Stats
 		var statsRect = _layout.statsRect
 		ctx.strokeStyle = "#F0791E"
 		ctx.lineWidth = 3
-		ctx.strokeRect(statsRect.x0, statsRect.y0, statsRect.x1 - statsRect.x0, statsRect.y1 - statsRect.y0)
+		//ctx.strokeRect(statsRect.x0, statsRect.y0, statsRect.x1 - statsRect.x0, statsRect.y1 - statsRect.y0)
+
+		// Draw BG pills.
+		var L = 20
+		var s = ctx.w / 8
+		var startDir = context.time.currTime * 2
+		var colors = [TileColor.red, TileColor.blue, TileColor.yellow]
+		var colors1 = [TileColor.blue, TileColor.yellow, TileColor.red]
+		var ii = 0
+		for (var yy = 0; yy < L; yy++) {
+			for (var xx = 0; xx < L; xx++) {
+				ii = (ii + 1) % colors.length
+				drawPlayerPill(ctx, PlayerPill([colors[ii], colors1[ii]]), xx * s, yy * s, s/5, startDir + xx * 45 + yy * 45)
+			}
+		}
 
 		// Draw board.
 		var board = _gameState.board
-		var dX = ctx.w * 0.25
-		var dY = ctx.h * 0.25
-		console.assert(isDef(dX))
 		board.dX = boardRect.x0 + (tileSize / 2)
 		board.dY = boardRect.y0 + (tileSize / 2)
 		board.rect = boardRect
@@ -563,11 +661,11 @@ return {
 		if (isDef(_gameState.playerPill)) {
 			drawPlayerPillOnBoard(ctx, _gameState.playerPill, board)
 		}
-		if (isDef(_gameState.nextPill)) {
-			var pX = homeRect.x0 + (homeRect.x1 - homeRect.x0) / 2
-			var pY = homeRect.y0 + (homeRect.y1 - homeRect.y0) / 2
-			drawPlayerPill(ctx, _gameState.nextPill, pX, pY, board.tileSize, 0)
-		}
+		// if (isDef(_gameState.nextPill)) {
+		// 	var pX = homeRect.x0 + (homeRect.x1 - homeRect.x0) / 2
+		// 	var pY = homeRect.y0 + (homeRect.y1 - homeRect.y0) / 2
+		// 	drawPlayerPill(ctx, _gameState.nextPill, pX, pY, board.tileSize, 0)
+		// }
 
 		// Draw item
 		queueDraw()

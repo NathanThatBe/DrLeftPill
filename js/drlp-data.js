@@ -92,6 +92,7 @@ return {
 
 const PillBoard = () => {
 var _tiles = []
+function isOOB(x, y) { return x < 0 || x >= BOARD_W || y < 0 || y >= BOARD_H }
 var board = {
 	w: BOARD_W,
 	h: BOARD_H,
@@ -99,12 +100,10 @@ var board = {
 	rect: null,
 	tiles: _tiles,
 	getTileType: (x, y) => { return _tiles[y][x].type },
-	isOutOfBounds: (x, y) => {
-		if (x < 0 || x >= BOARD_W || y < 0 || y >= BOARD_H) {
-			return true
-		}
-		return false
-	},
+	isOutOfBounds: (x, y) => { return isOOB(x, y) },
+	isFree: (x, y) => {
+		return !isOOB(x, y) && _tiles[y][x].type === TileType.none
+	}
 }
 for (var yy = 0; yy < BOARD_H; yy++) {
 	var tileRow = []
@@ -169,52 +168,45 @@ function canMove(board, x, y, dir) {
 	return dekiru
 }
 
-function convertFloatingPills(board) {
-	// Pill can be disconnected if:
-	// 1. Other pill end is gone
-	// 2. (Hori) Both pill ends floating
+function equalLocs(loc0, loc1) {
+	return loc0.x === loc1.x && loc0.y === loc1.y
+}
 
-	var pillsToBeBroken = []
-	function pushTile(tile) {
-		var isDuplicate = false
-		pillsToBeBroken.forEach(t => {
-			if (t[0] === tile[0] && t[1] === tile[1]) isDuplicate = true
-		})
-		if (!isDuplicate) pillsToBeBroken.push(tile)
-	}
+function pushLoc(list, loc) {
+	var isDuplicate = false
+	list.forEach(l => {
+		if (equalLocs(l, loc)) isDuplicate = true
+	})
+	if (!isDuplicate) list.push(loc)
+}
 
-	// 1.
-	for (var yy = 0; yy < board.h; yy++) {
-		for (var xx = 0; xx <board.w; xx++) {
-			var tile = board.tiles[yy][xx]
-			if (isDef(tile.connectionDir)) {
-				var otherEnd = findOtherPillEnd(board, xx, yy, tile.connectionDir)
-				if (otherEnd.type !== TileType.pill || !isDef(otherEnd.connectionDir)) {
-					pushTile([xx, yy])
-				}
-			}
-		}
-	}
-
-	// 2.
+function findAllFloatingPills(board) {
+	var locs = []
 	for (var yy = 0; yy < board.h; yy++) {
 		for (var xx = 0; xx < board.w; xx++) {
 			var tile = board.tiles[yy][xx]
-			if (isDef(tile.connectionDir)) {
-				var otherEnd = offsetPos(xx, yy, tile.connectionDir)
+			if (isUndef(tile.connectionDir)) continue
 
-				var tileBelow0 = findTileBelow(board, xx, yy)
-				var tileBelow1 = findTileBelow(board, otherEnd[0], otherEnd[1])
-				if (!isDef(tileBelow0) || !isDef(tileBelow1)) continue
-				if (tileBelow0.type === TileType.none && tileBelow1.type === TileType.none) {
-					pushTile([xx, yy])
-					pushTile(otherEnd)
-				}
+			var offset = connectionDirOffset(tile.connectionDir)
+			var otherEnd = null
+			if (!board.isOutOfBounds(xx + offset.x, yy + offset.y)) {
+				otherEnd = board.tiles[yy + offset.y][xx + offset.x]
+			}
+
+			// If other end is non-existant
+			if (isUndef(otherEnd.connectionDir) || otherEnd.type !== TileType.pill) {
+				pushLoc(locs, { x: xx, y:  yy })
+			}
+
+			// If both ends are floating
+			var otherOffset = otherOffsetLoc(xx, yy, tile.connectionDir)
+			if (board.isFree(xx, yy + 1) && board.isFree(otherOffset.x, otherOffset.y + 1)) {
+				pushLoc(locs, { x: xx, y: yy })
+				pushLoc(locs, { x: otherOffset.x, y: otherOffset.y })
 			}
 		}
 	}
-
-	return pillsToBeBroken
+	return locs
 }
 
 function findTilesThatCanFall(board) {
@@ -232,8 +224,9 @@ function findTilesThatCanFall(board) {
 		if (!isDuplicate(tile)) tiles.push(tile)
 	}
 
-	for (var xx = 0; xx < board.w; xx++) {
-		for (var yy = board.h - 1; yy >= 0; yy--) {
+
+	for (var yy = board.h - 1; yy >= 0; yy--) {
+		for (var xx = 0; xx < board.w; xx++) {
 			function tileBelowIsFree(x, y) {				
 				var tileBelow = board.tiles[y+1][x]
 				return tileBelow.type === TileType.none || isDuplicate([x, y+1])
@@ -268,39 +261,23 @@ function findTilesThatCanFall(board) {
 	return tiles
 }
 
-function dirToOffset(dir) {
+function connectionDirOffset(dir) {
 	switch (dir) {
 		case ConnectionDir.up:
-			return [0, -1]
+			return { x: 0, y: -1 }
 		case ConnectionDir.down:
-			return [0, +1]
+			return { x: 0, y: +1 }
 		case ConnectionDir.left:
-			return [-1, 0]
+			return { x: -1, y: 0 }
 		case ConnectionDir.right:
-			return [1, 0]
+			return { x: 1, y: 0 }
 	}
 }
 
-function offsetPos(x, y, dir) {
-	var offset = dirToOffset(dir)
-	return [x + offset[0], y + offset[1]]
+function otherOffsetLoc(x, y, connectionDir) {
+	var offset = connectionDirOffset(connectionDir)
+	return { x: x + offset.x, y: y + offset.y }
 }
-
-function findOtherPillEnd(board, x, y, dir) {
-	var offset = dirToOffset(dir)
-	
-	if (board.isOutOfBounds(x + offset[0], y + offset[1])) {
-		return null
-	}
-	return board.tiles[y + offset[1]][x + offset[0]]
-}
-
-function findTileBelow(board, x, y) {
-	console.assert(isDef(board))
-	if (board.isOutOfBounds(x, y + 1)) return null
-	return board.tiles[y+1][x]
-}
-
 
 function searchVertically(board, x, y) {
 	var startTile = board.tiles[y][x]
