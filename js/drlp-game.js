@@ -135,6 +135,24 @@ function eventName(event) {
 	return Object.keys(ItemEvent).find(key => ItemEvent[key] === event)
 }
 
+const StartItem = (gameState) => {
+return {
+	enter: () => {},
+	tick: () => {
+		if (context.input.pressed.length > 0) {
+			return { status: ItemStatus.complete, event: ItemEvent.resetGame }
+		}
+	},
+	draw: () => {
+		var ctx = context.ctx
+		ctx.fillStyle = "white"
+		ctx.font = (ctx.w / 30) + "px Itim"
+		ctx.textAlign = "center"
+		ctx.fillText("Press any key to play", ctx.w/2, ctx.h*0.5)
+	}
+}
+}
+
 const SpawnPlayerPillItem = (gameState) => {
 var _animation = { t: 0, dur: 0.2 }
 var _shouldAnimate = true
@@ -577,6 +595,10 @@ return {
 function switchItem(event) {
 	// console.log("switch -", eventName(event))
 	switch (event) {
+		case ItemEvent.startGame:
+			_gameState = GameState()
+			queuePush(StartItem)
+			break
 		case ItemEvent.resetGame:
 			_gameState = GameState()
 			console.log("new game state")
@@ -644,7 +666,7 @@ function queueDraw() {
 return {
 	enter: () => {
 		console.log("DrLeftPillGame - ENTER")
-		switchItem(ItemEvent.resetGame)
+		switchItem(ItemEvent.startGame)
 	},
 	tick: () => {
 		if (!queueHasItem()) {

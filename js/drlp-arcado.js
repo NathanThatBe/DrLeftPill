@@ -60,7 +60,7 @@ return {
 			if (["Space", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].indexOf(event.code) > -1) {
 				event.preventDefault()
 			}
-			if (event.code === "Backquote") {
+			if (event.code === "Backquote" || event.key.toUpperCase() === "P") {
 				_paused = !_paused
 			}
 			if (context.input.down.indexOf(event.key) < 0) {
