@@ -148,7 +148,7 @@ return {
 				ctx.fillRect(0, 0, ctx.w, ctx.h)
 
 				ctx.fillStyle = "#FFFFFF" + "88"
-				ctx.font = "100px MONOSPACE"
+				ctx.font = (ctx.w * 0.2) + "px Itim"
 				ctx.textAlign = "center"
 				ctx.fillText("PAUSED", ctx.w/2, ctx.h/2)
 			}

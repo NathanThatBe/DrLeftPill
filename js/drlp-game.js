@@ -601,7 +601,6 @@ function switchItem(event) {
 			break
 		case ItemEvent.resetGame:
 			_gameState = GameState()
-			console.log("new game state")
 			queuePush(SpawnVirusItem)
 			break
 		case ItemEvent.spawnedViruses:
