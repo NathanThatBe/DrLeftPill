@@ -33,11 +33,11 @@ function newDrawPill(ctx, x, y, r, c) {
 	// Base albedo
 	ctx.fillStyle = c
 	ctx.strokeStyle = "white"
-	ctx.lineWidth = r * 0.1
+	ctx.lineWidth = r * 0.6
 	ctx.beginPath()
 	ctx.arc(x, y, r, 0, 2*Math.PI)
-	ctx.fill()
 	ctx.stroke()
+	ctx.fill()
 	ctx.closePath()
 
 	// Highlight
@@ -48,40 +48,30 @@ function newDrawPill(ctx, x, y, r, c) {
 	ctx.closePath()
 }
 
-
-function drawPill(ctx, x, y, dX, dY, scale, size) {
-	const pW = (size * 0.75)/2 * scale
-	ctx.beginPath()
-	ctx.arc(dX + x * size, dY + y * size, pW, 0, 2*Math.PI)
-	ctx.fill()
-	ctx.closePath()
-
-	// Sparkle
-	ctx.fillStyle = "white"
-	ctx.beginPath()
-	ctx.arc(dX + x * size, dY + y * size, pW*0.5, 0, 2*Math.PI)
-	ctx.fill()
-	ctx.closePath()
-}
-
 function newDrawFullPill(ctx, x, y, dir, r, spacing, c) {
 
 	// Snap to dir
+	var d = dir
 	var dirs = 8
-	dir = Math.floor(dir / dirs) * (Math.PI*2 / dirs)
+	var slice = (Math.PI*2 / dirs)
+	dir = Math.floor(d / dirs) * slice
 
 	// Bar outline
 	ctx.strokeStyle = "white"
-	ctx.lineWidth = r * 0.2
+	ctx.fillStyle = "white"
+	var extru = r * 0.6
+	ctx.lineWidth = extru
+	r = r + extru/2
 	ctx.beginPath()
 	ctx.moveTo(x - Math.sin(dir) * r, y + Math.cos(dir) * r, 0, 2*Math.PI)
 	ctx.lineTo(x + Math.cos(dir) * spacing - Math.sin(dir) * r, y + Math.sin(dir) * spacing + Math.cos(dir) * r, 0, 2*Math.PI)
 	ctx.lineTo(x + Math.cos(dir) * spacing + Math.sin(dir) * r, y + Math.sin(dir) * spacing - Math.cos(dir) * r, 0, 2*Math.PI)
 	ctx.lineTo(x - Math.cos(dir) * spacing + Math.sin(dir) * r, y - Math.sin(dir) * spacing - Math.cos(dir) * r, 0, 2*Math.PI)
 	ctx.lineTo(x - Math.cos(dir) * spacing - Math.sin(dir) * r, y - Math.sin(dir) * spacing + Math.cos(dir) * r, 0, 2*Math.PI)
-	ctx.lineTo(x - Math.sin(dir) * r, y + Math.cos(dir) * r, 0, 2*Math.PI)
-	ctx.stroke()
+	//ctx.lineTo(x - Math.sin(dir) * r, y + Math.cos(dir) * r, 0, 2*Math.PI)
+	ctx.fill()
 	ctx.closePath()
+	r = r - extru/2
 
 	// Cap outlines
 	ctx.strokeStyle = "white"
@@ -137,25 +127,26 @@ function newDrawFullPill(ctx, x, y, dir, r, spacing, c) {
 	// Sparkle
 	ctx.fillStyle = "white"
 	
+	var oneDir = Math.floor(d / dirs) * slice
+
 	ctx.beginPath()
-	ctx.arc(x - Math.cos(dir) * spacing + Math.sin(dir) * r * 0.3, y - Math.sin(dir) * spacing - Math.cos(dir) * r * 0.3, r*0.3, 0, 2*Math.PI)
+	ctx.arc(x - Math.cos(oneDir) * spacing + Math.sin(oneDir) * r * 0.3, y - Math.sin(oneDir) * spacing - Math.cos(oneDir) * r * 0.3, r*0.3, 0, 2*Math.PI)
 	ctx.fill()
 	ctx.closePath()
 
 	ctx.beginPath()
-	ctx.arc(x + Math.cos(dir) * spacing - Math.sin(dir) * r * 0.3, y + Math.sin(dir) * spacing + Math.cos(dir) * r * 0.3, r*0.3, 0, 2*Math.PI)
+	ctx.arc(x + Math.cos(oneDir) * spacing + Math.sin(oneDir) * r * 0.3, y + Math.sin(oneDir) * spacing - Math.cos(oneDir) * r * 0.3, r*0.3, 0, 2*Math.PI)
 	ctx.fill()
 	ctx.closePath()
 
-
-	// Axis of rotation
-	ctx.fillStyle = "cyan"
+	// Middle line
+	ctx.strokeStyle = "black"
+	ctx.lineWidth = 2
 	ctx.beginPath()
-	ctx.arc(x, y, 2, 0, 2*Math.PI)
-	ctx.fill()
+	ctx.moveTo(x - Math.sin(dir) * r, y + Math.cos(dir) * r, 0, 2*Math.PI)
+	ctx.lineTo(x + Math.sin(dir) * r, y - Math.cos(dir) * r, 0, 2*Math.PI)
+	ctx.stroke()
 	ctx.closePath()
-
-	ctx.lineWidth = 1
 }
 
 function drawPillboard(ctx, board) {
@@ -231,7 +222,7 @@ function drawPillboard(ctx, board) {
 				case TileType.pill:
 					ctx.fillStyle = setFillColor(tile.color)
 					if (isUndef(tile.connectionDir)) {
-						newDrawPill(ctx, dX + xx * size + tile.animation.offset.x, dY + yy * size + tile.animation.offset.y, size*0.4, setFillColor(tile.color))
+						newDrawPill(ctx, dX + xx * size + tile.animation.offset.x, dY + yy * size + tile.animation.offset.y, size*0.3, setFillColor(tile.color))
 					} else {
 						var otherTile = null
 						var pillDir = null
@@ -256,7 +247,7 @@ function drawPillboard(ctx, board) {
 						var pY = dY + (yy + getPillDirY(pillDir)/2) * size
 						var dir = pillDir === PillDir.right ? 0 : 180
 						var colors = [setFillColor(tile.color), setFillColor(otherTile.color)]
-						newDrawFullPill(ctx, pX, pY, dir, board.tileSize*0.4, board.tileSize/2, colors.reverse())
+						newDrawFullPill(ctx, pX, pY, dir, board.tileSize*0.3, board.tileSize/2, colors.reverse())
 				   	}
 					break
 			}
@@ -283,5 +274,5 @@ function drawPlayerPillOnBoard(ctx, pill, board) {
 
 function drawPlayerPill(ctx, pill, pX, pY, size, dir) {
 	var colors = !pill.isReversed ? [setFillColor(pill.colors[0]), setFillColor(pill.colors[1])] :  [setFillColor(pill.colors[1]), setFillColor(pill.colors[0])]
-	newDrawFullPill(ctx, pX, pY, dir, size*0.4, size/2, colors)
+	newDrawFullPill(ctx, pX, pY, dir, size*0.3, size/2, colors)
 }

@@ -3,7 +3,7 @@
 const DrLeftPillGame = function(context) {
 
 // Audio
-window.onload = initAudio
+initAudio()
 
 var audioContext
 var sfxBufferTick
@@ -11,6 +11,7 @@ var sfxBufferDrop
 var sfxBufferCombo1
 
 function initAudio() {
+	console.log("INIT AUDIO")
 	window.AudioContext = window.AudioContext || window.webkitAudioContext;
 
 	audioContext = new AudioContext()
