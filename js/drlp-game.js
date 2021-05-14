@@ -400,12 +400,7 @@ return {
 		})
 
 		// Apply gravity to columns of pills
-
-		console.log("A:",findTilesThatCanFall(board))
-		console.log("B:",newFindTilesThatCanFall(board))
-
-		//var tilesToMove = findTilesThatCanFall(board)
-		var tileLocsToMove = newFindTilesThatCanFall(board)
+		var tileLocsToMove = findTilesThatCanFall(board)
 		if (tileLocsToMove.length === 0) {
 			return { status: ItemStatus.complete, event: ItemEvent.appliedGravity }
 		}
