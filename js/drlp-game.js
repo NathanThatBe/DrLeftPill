@@ -216,7 +216,7 @@ return {
 					virus.animation.spawnDelay = 0
 					virus.animation.offset = { x: randomRange(0, 1), y: randomRange(0, 1) }
 					_viruses.push(virus)
-					gameState.board.tiles[yy][xx] = virus
+					gameState.board.set(xx, yy, virus)
 				}	
 			}
 		}
@@ -361,8 +361,8 @@ return {
 			tile1.y = playerPill.y + getPillDirY(playerPill.dir)
 			tile1.connectionDir = playerPill.dir === PillDir.up ? ConnectionDir.down : ConnectionDir.left
 
-			gameState.board.tiles[tile0.y][tile0.x] = tile0
-			gameState.board.tiles[tile1.y][tile1.x] = tile1
+			gameState.board.set(tile0.x, tile0.y, tile0)
+			gameState.board.set(tile1.x, tile1.y, tile1)
 
 			gameState.playerPill = null
 
@@ -395,24 +395,24 @@ return {
 		var board = gameState.board
 		var floatingPills = findAllFloatingPills(board)
 		floatingPills.forEach(tile => {
-			var pillEnd = board.tiles[tile.y][tile.x]
+			var pillEnd = board.get(tile.x, tile.y)
 			pillEnd.connectionDir = null
 		})
 
 		// Apply gravity to columns of pills
-		var tilesToMove = findTilesThatCanFall(board)
-		if (tilesToMove.length === 0) {
+		var tileLocsToMove = findTilesThatCanFall(board)
+		if (tileLocsToMove.length === 0) {
 			return { status: ItemStatus.complete, event: ItemEvent.appliedGravity }
 		}
 
 		// Move all tiles at together
-		tilesToMove.forEach(loc => {
-			var tile = board.tiles[loc[1]][loc[0]]
-			var tileBelow = board.tiles[loc[1]+1][loc[0]]
+		tileLocsToMove.forEach(loc => {
+			var tile = board.get(loc.x, loc.y)
+			var tileBelow = board.get(loc.x, loc.y + 1)
 
 			// swap
-			board.tiles[loc[1]+1][loc[0]] = tile
-			board.tiles[loc[1]][loc[0]] = tileBelow
+			board.set(loc.x, loc.y + 1, tile)
+			board.set(loc.x, loc.y, tileBelow)
 		})
 		return { status: ItemStatus.waiting }
 	},
@@ -438,12 +438,12 @@ return {
 
 		// Break up pills
 		_tilesToRemove.forEach(tile => {
-			var pillEnd = board.tiles[tile[1]][tile[0]]
+			var pillEnd = board.get(tile.x, tile.y)
 			pillEnd.connectionDir = null
 		})
 		var floatingPills = findAllFloatingPills(board)
 		floatingPills.forEach(tile => {
-			var pillEnd = board.tiles[tile.y][tile.x]
+			var pillEnd = board.get(tile.x, tile.y)
 			pillEnd.connectionDir = null
 		})
 
@@ -460,9 +460,10 @@ return {
 		}
 
 		// Shake all tiles at the same time.
-		_tilesToRemove.forEach(tile => { 
-			gameState.board.tiles[tile[1]][tile[0]].animation.offset.x = randomRange(-5, 5)
-			gameState.board.tiles[tile[1]][tile[0]].y = randomRange(-5, 5)
+		_tilesToRemove.forEach(tile => {
+			var t = gameState.board.get(tile.x, tile.y)
+			t.animation.offset.x = randomRange(-5, 5)
+			t.animation.offset.y = randomRange(-5, 5)
 		})
 
 		// Scale 1 tile at a time
@@ -470,11 +471,11 @@ return {
 		_delay.t += context.time.timeStep
 
 		var t = lerp(1, 0, Math.min(1, _delay.t / _delay.dur))
-		var boardTile = gameState.board.tiles[tile[1]][tile[0]]
+		var boardTile = gameState.board.get(tile.x, tile.y)
 		boardTile.animation.scale = t
 		
 		if (_delay.t >= _delay.dur) {
-			gameState.board.tiles[tile[1]][tile[0]] = Tile(TileType.none, TileColor.none)
+			gameState.board.set(tile.x, tile.y, Tile(TileType.none, TileColor.none))
 			_tilesToRemove.shift()
 			_delay.t = 0
 
@@ -491,7 +492,7 @@ return {
 		ctx.lineWidth = 2.5
 		_tilesToRemove.forEach(tile => {
 			ctx.beginPath()
-			ctx.arc(board.dX + tile[0] * board.tileSize, board.dY + tile[1] * board.tileSize, 12, 0, 2*Math.PI)
+			ctx.arc(board.dX + tile.x * board.tileSize, board.dY + tile.y * board.tileSize, 12, 0, 2*Math.PI)
 			ctx.stroke()
 			ctx.closePath()
 		})
@@ -570,7 +571,7 @@ return {
 		function hasViruses() {
 			for (var yy = 0; yy < board.h; yy++) {
 				for (var xx = 0; xx < board.w; xx++) {
-					if (board.tiles[yy][xx].type === TileType.virus)
+					if (board.get(xx, yy).type === TileType.virus)
 						return true
 				}
 			}
@@ -581,7 +582,7 @@ return {
 		}
 
 		// Check if top out.
-		if (board.tiles[0][3].type !== TileType.none || board.tiles[0][4].type !== TileType.none) {
+		if (board.get(3, 0).type !== TileType.none || board.get(4, 0).type !== TileType.none) {
 			return { status: ItemStatus.complete, event: ItemEvent.topOut }
 		}
 

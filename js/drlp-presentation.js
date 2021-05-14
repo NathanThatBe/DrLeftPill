@@ -206,7 +206,7 @@ function drawPillboard(ctx, board) {
 	// Draw tiles
 	for (var yy = 0; yy < board.h; yy++) {
 		for (var xx = 0; xx < board.w; xx++) {
-			var tile = board.tiles[yy][xx]
+			var tile = board.get(xx, yy)
 					
 			switch (tile.type) {
 				case TileType.none:
@@ -227,11 +227,11 @@ function drawPillboard(ctx, board) {
 				   			case ConnectionDir.left:
 				   				continue
 				   			case ConnectionDir.right:
-				   				otherTile = board.tiles[yy][xx + 1]
+				   				otherTile = board.get(xx + 1, yy)
 				   				pillDir = PillDir.right
 				   				break
 				   			case ConnectionDir.up:
-				   				otherTile = board.tiles[yy - 1][xx]
+				   				otherTile = board.get(xx, yy - 1)
 				   				pillDir = PillDir.up
 				   				break
 				   		}
