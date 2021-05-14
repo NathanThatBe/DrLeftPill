@@ -98,7 +98,8 @@ var board = {
 	h: BOARD_H,
 	tileSize: 0,
 	rect: null,
-	tiles: _tiles,
+	get: (x, y) => { return _tiles[y][x] },
+	set: (x, y, t) => { _tiles[y][x] = t },
 	getTileType: (x, y) => { return _tiles[y][x].type },
 	isOutOfBounds: (x, y) => { return isOOB(x, y) },
 	isFree: (x, y) => {
@@ -188,13 +189,13 @@ function findAllFloatingPills(board) {
 	var locs = []
 	for (var yy = 0; yy < board.h; yy++) {
 		for (var xx = 0; xx < board.w; xx++) {
-			var tile = board.tiles[yy][xx]
+			var tile = board.get(xx, yy)
 			if (isUndef(tile.connectionDir)) continue
 
 			var offset = connectionDirOffset(tile.connectionDir)
 			var otherEnd = null
 			if (!board.isOutOfBounds(xx + offset.x, yy + offset.y)) {
-				otherEnd = board.tiles[yy + offset.y][xx + offset.x]
+				otherEnd = board.get(xx + offset.x, yy + offset.y)
 			}
 
 			// If other end is non-existant
@@ -221,10 +222,10 @@ function findTilesThatCanFall(board) {
 	for (var yy = board.h - 1; yy >= 0; yy--) {
 		for (var xx = 0; xx < board.w; xx++) {
 			function tileBelowIsFree(x, y) {				
-				var tileBelow = board.tiles[y+1][x]
-				return tileBelow.type === TileType.none || isDuplicateLoc(tiles, {x: x, y: y+1})
+				var tileBelow = board.get(x, y + 1)
+				return tileBelow.type === TileType.none || isDuplicateLoc(tiles, {x: x, y: y + 1})
 			}
-			var tile = board.tiles[yy][xx]
+			var tile = board.get(xx, yy)
 			if (tile.type !== TileType.pill) continue
 			if (yy + 1 >= board.h) continue
 
@@ -273,7 +274,7 @@ function otherOffsetLoc(x, y, connectionDir) {
 }
 
 function searchVertically(board, x, y) {
-	var startTile = board.tiles[y][x]
+	var startTile = board.get(x, y)
 	if (startTile.type === TileType.none) {
 		return 0
 	}
@@ -283,7 +284,7 @@ function searchVertically(board, x, y) {
 	var combo = 1
 	var currY = y + 1
 	while(checking && currY < board.h) {
-		var currTile = board.tiles[currY][x]
+		var currTile = board.get(x, currY)
 		if (currTile.color === color) {
 			currY ++
 			combo ++
@@ -295,7 +296,7 @@ function searchVertically(board, x, y) {
 }
 
 function searchHorizontally(board, x, y) {
-	var startTile = board.tiles[y][x]
+	var startTile = board.get(x, y)
 	if (startTile.type === TileType.none) {
 		return 0
 	}
@@ -305,7 +306,7 @@ function searchHorizontally(board, x, y) {
 	var combo = 1
 	var currX = x + 1
 	while(checking && currX < board.w) {
-		var currTile = board.tiles[y][currX]
+		var currTile = board.get(currX, y)
 		if (currTile.color === color) {
 			currX ++
 			combo ++
