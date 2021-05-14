@@ -438,7 +438,7 @@ return {
 
 		// Break up pills
 		_tilesToRemove.forEach(tile => {
-			var pillEnd = board.get(tile[0], tile[1])
+			var pillEnd = board.get(tile.x, tile.y)
 			pillEnd.connectionDir = null
 		})
 		var floatingPills = findAllFloatingPills(board)
@@ -461,7 +461,7 @@ return {
 
 		// Shake all tiles at the same time.
 		_tilesToRemove.forEach(tile => {
-			var t = gameState.board.get(tile[0], tile[1])
+			var t = gameState.board.get(tile.x, tile.y)
 			t.animation.offset.x = randomRange(-5, 5)
 			t.animation.offset.y = randomRange(-5, 5)
 		})
@@ -471,11 +471,11 @@ return {
 		_delay.t += context.time.timeStep
 
 		var t = lerp(1, 0, Math.min(1, _delay.t / _delay.dur))
-		var boardTile = gameState.board.get(tile[0], tile[1])
+		var boardTile = gameState.board.get(tile.x, tile.y)
 		boardTile.animation.scale = t
 		
 		if (_delay.t >= _delay.dur) {
-			gameState.board.set(tile[0], tile[1], Tile(TileType.none, TileColor.none))
+			gameState.board.set(tile.x, tile.y, Tile(TileType.none, TileColor.none))
 			_tilesToRemove.shift()
 			_delay.t = 0
 
@@ -492,7 +492,7 @@ return {
 		ctx.lineWidth = 2.5
 		_tilesToRemove.forEach(tile => {
 			ctx.beginPath()
-			ctx.arc(board.dX + tile[0] * board.tileSize, board.dY + tile[1] * board.tileSize, 12, 0, 2*Math.PI)
+			ctx.arc(board.dX + tile.x * board.tileSize, board.dY + tile.y * board.tileSize, 12, 0, 2*Math.PI)
 			ctx.stroke()
 			ctx.closePath()
 		})

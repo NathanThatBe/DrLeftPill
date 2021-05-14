@@ -319,27 +319,20 @@ function searchHorizontally(board, x, y) {
 
 function findComboTiles(board) {
 	var tilesToRemove = []
-	function pushTile(tile) {
-		var isDuplicate = false
-		tilesToRemove.forEach(t => {
-			if (t[0] === tile[0] && t[1] === tile[1]) isDuplicate = true
-		})
-		if (!isDuplicate) tilesToRemove.push(tile)
-	}
 	const minCombo = 4
 	for (var xx = 0; xx < board.w; xx++) {
 		for (var yy = 0; yy < board.h; yy++) {
 			var comboY = searchVertically(board, xx, yy)
 			if (comboY >= minCombo) {
 				for (var jj = 0; jj < comboY; jj++) {
-					pushTile([xx, yy+jj])
+					pushLoc(tilesToRemove, {x: xx, y: yy + jj})
 				}
 			}
 
 			var comboX = searchHorizontally(board, xx, yy)
 			if (comboX >= minCombo) {
 				for (var jj = 0; jj < comboX; jj++) {
-					pushTile([xx+jj, yy])
+					pushLoc(tilesToRemove, {x: xx + jj, y: yy})
 				}
 			}
 		}
