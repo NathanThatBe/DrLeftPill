@@ -400,19 +400,24 @@ return {
 		})
 
 		// Apply gravity to columns of pills
-		var tilesToMove = findTilesThatCanFall(board)
-		if (tilesToMove.length === 0) {
+
+		console.log("A:",findTilesThatCanFall(board))
+		console.log("B:",newFindTilesThatCanFall(board))
+
+		//var tilesToMove = findTilesThatCanFall(board)
+		var tileLocsToMove = newFindTilesThatCanFall(board)
+		if (tileLocsToMove.length === 0) {
 			return { status: ItemStatus.complete, event: ItemEvent.appliedGravity }
 		}
 
 		// Move all tiles at together
-		tilesToMove.forEach(loc => {
-			var tile = board.tiles[loc[1]][loc[0]]
-			var tileBelow = board.tiles[loc[1]+1][loc[0]]
+		tileLocsToMove.forEach(loc => {
+			var tile = board.tiles[loc.y][loc.x]
+			var tileBelow = board.tiles[loc.y+1][loc.x]
 
 			// swap
-			board.tiles[loc[1]+1][loc[0]] = tile
-			board.tiles[loc[1]][loc[0]] = tileBelow
+			board.tiles[loc.y+1][loc.x] = tile
+			board.tiles[loc.y][loc.x] = tileBelow
 		})
 		return { status: ItemStatus.waiting }
 	},

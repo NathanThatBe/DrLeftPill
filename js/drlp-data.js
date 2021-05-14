@@ -172,12 +172,20 @@ function equalLocs(loc0, loc1) {
 	return loc0.x === loc1.x && loc0.y === loc1.y
 }
 
-function pushLoc(list, loc) {
-	var isDuplicate = false
+function isDuplicateLoc(list, loc) {
 	list.forEach(l => {
-		if (equalLocs(l, loc)) isDuplicate = true
+		if (equalLocs(l, loc)) return true
 	})
-	if (!isDuplicate) list.push(loc)
+	return false
+}
+
+function pushLoc(list, loc) {
+	// var isDuplicate = false
+	// list.forEach(l => {
+	// 	if (equalLocs(l, loc)) isDuplicate = true
+	// })
+	// if (!isDuplicate) list.push(loc)
+	if (!isDuplicateLoc(list, loc)) list.push(loc)
 }
 
 function findAllFloatingPills(board) {
@@ -252,6 +260,58 @@ function findTilesThatCanFall(board) {
 						break
 					case ConnectionDir.right:
 						if (tileBelowIsFree(xx, yy) && tileBelowIsFree(xx+1, yy)) pushTile([xx, yy])
+						break
+				}
+			}
+		}
+	}
+
+	return tiles
+}
+
+function newFindTilesThatCanFall(board) {
+	console.assert(isDef(board))
+
+	var tiles = []
+	function isDuplicate(tile) {
+		var isDup = false
+		tiles.forEach(t => {
+			//if (t[0] === tile[0] && t[1] === tile[1]) isDup = true
+			if (t.x === tile.x && t.y === tile.y) isDup = true
+		})
+		return isDup
+	}
+	function pushTile(tile) {
+		if (!isDuplicate(tile)) tiles.push(tile)
+	}
+
+	for (var yy = board.h - 1; yy >= 0; yy--) {
+		for (var xx = 0; xx < board.w; xx++) {
+			function tileBelowIsFree(x, y) {				
+				var tileBelow = board.tiles[y+1][x]
+				return tileBelow.type === TileType.none || isDuplicate({x: x, y: y+1})
+			}
+			var tile = board.tiles[yy][xx]
+			if (tile.type !== TileType.pill) continue
+			if (yy + 1 >= board.h) continue
+
+			if (isUndef(tile.connectionDir)) {
+				// Handle loose pill
+				if (tileBelowIsFree(xx, yy)) pushTile({x: xx, y: yy })
+			} else {
+				// Handle connected pill
+				switch (tile.connectionDir) {
+					case ConnectionDir.up:
+						if (tileBelowIsFree(xx, yy)) pushTile({x: xx, y: yy})
+						break
+					case ConnectionDir.down:
+						if (tileBelowIsFree(xx, yy)) pushTile({x: xx, y: yy})
+						break
+					case ConnectionDir.left:
+						if (tileBelowIsFree(xx, yy) && tileBelowIsFree(xx-1, yy)) pushTile({x: xx, y: yy})
+						break
+					case ConnectionDir.right:
+						if (tileBelowIsFree(xx, yy) && tileBelowIsFree(xx+1, yy)) pushTile({x: xx, y: yy})
 						break
 				}
 			}
